@@ -7,7 +7,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).parent.parent
 KEYS = PROJECT_ROOT / 'keyz'
 LOGINDATA = KEYS / 'logins.key'
-LOGFILE = PROJECT_ROOT / 'client.log'
+LOGFILE = PROJECT_ROOT / 'logs' / 'client.log'
 
 class IRCClient:
     def __init__(self, nick, token, server='irc.chat.twitch.tv', port=6697, 

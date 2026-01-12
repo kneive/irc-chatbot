@@ -4,6 +4,8 @@ from datetime import datetime
 from typing import Optional, Dict, List, Tuple
 from dataclasses import dataclass
 
+# TODO refactor
+
 @dataclass
 class Room:
     room_id:str | None = None
