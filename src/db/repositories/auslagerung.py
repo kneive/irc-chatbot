@@ -1,8 +1,3 @@
-import sqlite3
-from models import Roomstate, User
-from typing import Optional
-from datetime import datetime
-
 class Saltminer:
 
     def _check_user(self, user_id:str) -> bool:

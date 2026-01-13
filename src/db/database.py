@@ -1,7 +1,7 @@
 import sqlite3
+from typing import Optional, List
 
-
-class DatasbaseManager:
+class DatabaseManager:
     def __init__(self, db_path='saltmine.db'):
         self.db_path = db_path
         self.setup_database()
@@ -147,5 +147,10 @@ class DatasbaseManager:
 
     def execute_query(self, query:str, params:tuple=()):
         """Execute a query against the database"""
+
+        pass
+
+    def execute_query_all(self, query:str, params:tuple=()) -> Optional[List[tuple]]:
+        """Execute a query and return all results"""
 
         pass
