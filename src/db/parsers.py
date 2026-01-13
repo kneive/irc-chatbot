@@ -1,5 +1,5 @@
 from models import MessageInRoom, Sub, Subgift, UserInRoom
-from repositories import Saltminer as sm
+from db.repositories.base import Saltminer as sm
 
 
 class Saltshaker:

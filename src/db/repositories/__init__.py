@@ -1,13 +1,13 @@
-from .UserRepository import UserRepository
-from .RoomRepository import RoomRepository
-from .MessageRepository import MessageRepository
-from .UserInRoomRepository import UserInRoomRepository
-from .SubRepository import SubRepository
+from .userRepository import UserRepository
+from .roomRepository import RoomRepository
+from .messageRepository import MessageRepository
+from .userInRoomRepository import UserInRoomRepository
+from .subRepository import SubRepository
 
 __all__ = [
-    'UserRepository',
-    'RoomRepository',
-    'MessageRepository',
-    'UserInRoomRepository',
-    'SubRepository'
+    'userRepository',
+    'roomRepository',
+    'messageRepository',
+    'userInRoomRepository',
+    'subRepository'
 ]
