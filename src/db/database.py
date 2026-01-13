@@ -11,35 +11,12 @@ class DatabaseManager:
         with sqlite3.connect(self.db_path) as conn:
 
             conn.execute('''
-                CREATE TABLE IF NOT EXISTS room (
-                    room_id TEXT PRIMARY KEY,
-                    name TEXT NOT NULL
-                )             
-            ''')
-
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS user(
-                    user_id TEXT PRIMARY KEY,
-                    display_name TEXT,
-                    username TEXT,
-                    color TEXT,
-                    turbo INTEGER DEFAULT 0
-                )
-            ''')
-
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS user_in_room (
-                    room_id TEXT,
+                CREATE TABLE IF NOT EXISTS bits (
                     user_id TEXT,
-                    last_seen TIMESTAMP,
-                    returning_chatter INTEGER DEFAULT 0,
-                    first_message INTEGER DEFAULT 0,
-                    sub INTEGER DEFAULT 0,
-                    vip INTEGER DEFAULT 0,
-                    mod INTEGER DEFAULT 0,
-                    badges TEXT,
-                    user_type TEXT,
-                    PRIMARY KEY (room_id, user_id),
+                    room_id TEXT,
+                    timestamp TIMESTAMP,
+                    source_room_id TEXT,
+                    bits INTEGER DEFAULT 0,
                     FOREIGN KEY (room_id) REFERENCES room (id),
                     FOREIGN KEY (user_id) REFERENCES user (id)
                 )
@@ -60,6 +37,26 @@ class DatabaseManager:
                     FOREIGN KEY (room_id) REFERENCES room (id),
                     FOREIGN KEY (user_id) REFERENCES user (id)
                 )
+            ''')
+
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS raid (
+                    room_id TEXT,
+                    user_id TEXT,
+                    timestamp TIMESTAMP,
+                    source_room_id TEXT,
+                    viewer_count INTEGER DEFAULT 0,
+                    FOREIGN KEY (room_id) REFERENCES room (id),
+                    FOREIGN KEY (user_id) REFERENCES user (id)
+                )
+            ''')
+
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS room (
+                    room_id TEXT PRIMARY KEY,
+                    room_name TEXT NOT NULL
+                    added TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )             
             ''')
 
             conn.execute('''
@@ -109,24 +106,30 @@ class DatabaseManager:
             ''')
 
             conn.execute('''
-                CREATE TABLE IF NOT EXISTS bits (
-                    user_id TEXT,
-                    room_id TEXT,
-                    timestamp TIMESTAMP,
-                    source_room_id TEXT,
-                    bits INTEGER DEFAULT 0,
-                    FOREIGN KEY (room_id) REFERENCES room (id),
-                    FOREIGN KEY (user_id) REFERENCES user (id)
+                CREATE TABLE IF NOT EXISTS user(
+                    user_id TEXT PRIMARY KEY,
+                    display_name TEXT,
+                    username TEXT,
+                    color TEXT,
+                    turbo INTEGER DEFAULT 0,
+                    added TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             ''')
 
             conn.execute('''
-                CREATE TABLE IF NOT EXISTS raid (
+                CREATE TABLE IF NOT EXISTS user_in_room (
                     room_id TEXT,
                     user_id TEXT,
-                    timestamp TIMESTAMP,
-                    source_room_id TEXT,
-                    viewer_count INTEGER DEFAULT 0,
+                    last_seen TIMESTAMP,
+                    returning_chatter INTEGER DEFAULT 0,
+                    first_message INTEGER DEFAULT 0,
+                    sub INTEGER DEFAULT 0,
+                    vip INTEGER DEFAULT 0,
+                    mod INTEGER DEFAULT 0,
+                    badges TEXT,
+                    user_type TEXT,
+                    PRIMARY KEY (room_id, user_id),
                     FOREIGN KEY (room_id) REFERENCES room (id),
                     FOREIGN KEY (user_id) REFERENCES user (id)
                 )

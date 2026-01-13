@@ -12,7 +12,18 @@ class RoomRepository(Saltmine[Room]):
         pass
 
     def save(self, room:Room) -> None:
-        pass
+        """Insert or update a room in room table"""
+
+        query = '''
+                INSERT OR REPLACE INTO room 
+                (room_id, room_name, added) 
+                VALUES (?,?, CURRENT_TIMESTAMP)
+                '''
+        self.db.execute_query(query, (Room.room_id, 
+                                      Room.room_name))
 
     def exists(self, room_id:str) -> bool:
-        pass
+        """Checks whether room_id exists in room table"""
+
+        query= 'SELECT 1 FROM room WHERE id = ?'
+        return self.db.execute_query(query, (room_id))

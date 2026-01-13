@@ -8,10 +8,40 @@ class UserRepository(Saltmine[User]):
         self.db = db_manager
 
     def get_by_id(self, user_id:str) -> Optional[User]:
-        pass
+        """Get entry for user_id from user table"""
+
+        query = '''
+                SELECT user_id, display_name, username, color, turbo
+                FROM user
+                WHERE user_id = ?
+                '''
+        entry = self.db.execute_query(query, (user_id))
+        
+        if entry:
+            return User(user_id=entry[0],
+                        display_name=entry[1],
+                        username=entry[2],
+                        color=entry[3],
+                        turbo=entry[4])
+        return None
 
     def save(self, user:User) -> None:
-        pass
+        """Insert or update a user in user table"""
+
+        query = '''
+                INSERT OR REPLACE INTO user
+                (user_id, display_name, username, color, turbo)
+                VALUES (?,?,?,?,?)
+                '''
+        self.db.execute_query(query, (User.user_id, 
+                                      User.display_name, 
+                                      User.username, 
+                                      User.color, 
+                                      User.turbo))
 
     def exists(self, user_id:str) -> bool:
-        pass
+        """Check whether user_id exists in user table"""
+
+        query = 'SELECT 1 FROM user WHERE id = ?'
+        return self.db.execute_query(query, (user_id))
+        
