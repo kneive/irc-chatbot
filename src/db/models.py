@@ -19,6 +19,7 @@ class MessageInRoom:
     thread_message_id:str=''
     thread_user_id:str=''
     thread_display_name:str=''
+    content:str=''
 
 @dataclass
 class Raid:

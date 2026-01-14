@@ -1,3 +1,3 @@
-from .saltmineService import SaltmineService
+from .service import SaltyService
 
-__all__ = ['SaltmineService']
+__all__ = ['SaltyService']
