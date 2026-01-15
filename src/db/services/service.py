@@ -46,7 +46,7 @@ class SaltyService:
         """Process parsed message"""
 
         if not parsed.is_valid:
-            print(f'Corrupted messga: {parsed.error}')
+            print(f'PROCESS MESSAGE: Corrupted message: {parsed.error} (Variable: {parsed})')
             return
         
         if parsed.message_type == 'PRIVMSG':

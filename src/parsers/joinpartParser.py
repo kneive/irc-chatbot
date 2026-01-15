@@ -29,7 +29,7 @@ class JoinPartParser(BaseParser):
                                    input)
         
         except Exception as e:
-            print(f'{type} message is corrupted' )
+            print(f'(parse) {type} message is corrupted: {e}, ({tags.items()})' )
             result = ParseResult(type, {}, input)
             result.is_valid = False
             result.error = str(e)
@@ -43,13 +43,13 @@ class JoinPartParser(BaseParser):
                 
         idx = input.find('!')
         if idx == -1:
-            raise ValueError("JOIN message is corrupted: no '!'")
+            raise ValueError("(_parseJoin) JOIN message is corrupted: no '!'")
 
         tags['display-name'] = input[1:idx]
 
         idx = input.find('JOIN #')
         if idx == -1:
-            raise ValueError("JOIN messaee is corrupted: no '#'")
+            raise ValueError("(_parseJoin) JOIN messaee is corrupted: no '#'")
 
         tags['room-name'] = input[idx+1:].strip()
 
@@ -64,13 +64,13 @@ class JoinPartParser(BaseParser):
                 
         idx = input.find('!')
         if idx == -1:
-            raise ValueError("PART message is corrupted: no '!'")
+            raise ValueError("(_parsePart) PART message is corrupted: no '!'")
 
         tags['display-name'] = input[1:idx]
 
         idx = input.find('PART #')
         if idx == -1:
-            raise ValueError("PART messaee is corrupted: no '#'")
+            raise ValueError("(_parsePart) PART messaee is corrupted: no '#'")
 
         tags['room-name'] = input[idx+1:].strip()
 

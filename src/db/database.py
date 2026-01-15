@@ -54,7 +54,7 @@ class DatabaseManager:
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS room (
                     room_id TEXT PRIMARY KEY,
-                    room_name TEXT NOT NULL
+                    room_name TEXT NOT NULL,
                     added TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )             
             ''')

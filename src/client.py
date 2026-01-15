@@ -3,11 +3,25 @@ import ssl
 import threading
 from auth import get_token
 from pathlib import Path
+from parsers.parser import Saltshaker
+from db.repositories import (BitsRepository, 
+                             MessageRepository, 
+                             RaidRepository, 
+                             RoomRepository, 
+                             RoomStateRepository, 
+                             SubgiftRepository, 
+                             SubRepository, 
+                             UserInRoomRepository, 
+                             UserlistRepository, 
+                             UserRepository)
+
+from db.services.service import SaltyService
+from db.database import DatabaseManager
 
 PROJECT_ROOT = Path(__file__).parent.parent
 KEYS = PROJECT_ROOT / 'keyz'
 LOGINDATA = KEYS / 'logins.key'
-LOGFILE = PROJECT_ROOT / 'logs' / 'client.log'
+LOGFILE = PROJECT_ROOT / 'logs' / 'phunkroyal.log'
 
 class IRCClient:
     def __init__(self, nick, token, server='irc.chat.twitch.tv', port=6697, 
@@ -22,6 +36,30 @@ class IRCClient:
         self.log_file = log_file or LOGFILE
         self.log_handle = None
 
+        db_manager = DatabaseManager('saltmine.db')
+        bits_repo = UserRepository(db_manager)
+        msg_repo = MessageRepository(db_manager)
+        raid_repo = RaidRepository(db_manager)
+        room_repo = RoomRepository(db_manager)
+        roomstate_repo = RoomStateRepository(db_manager)
+        subgift_repo = SubgiftRepository(db_manager)
+        sub_repo = SubRepository(db_manager)
+        userinroom_repo = UserInRoomRepository(db_manager)
+        userlist_repo = UserlistRepository(db_manager)
+        user_repo = UserRepository(db_manager)
+
+        self.service = SaltyService(bits_repo,
+                                    msg_repo,
+                                    raid_repo,
+                                    room_repo,
+                                    roomstate_repo,
+                                    subgift_repo,
+                                    sub_repo,
+                                    userinroom_repo,
+                                    userlist_repo,
+                                    user_repo)
+        
+        self.parser = Saltshaker()
 
     def connect(self):
         """Connect to an IRC server."""
@@ -135,6 +173,14 @@ class IRCClient:
             payload = line.split(' ', 1)[1] if ' ' in line else ':tmi.twitch.tv'
             self.send_raw(f'PONG {payload}')
             print(f'PONG')
+            return
+        
+        try:
+            parsed = self.parser.parse(line)
+            if parsed:
+                self.service.process_message(parsed)
+        except Exception as e:
+            print(f'Error processing line: {e}')
 
     def input(self, default_channel=None):
         """Read user input and send to server"""
@@ -183,7 +229,7 @@ class IRCClient:
 
 if __name__ == '__main__':
 
-    nick = 'nickname'
+    nick = 'randomline95'
     token = get_token()
 
     if not nick or not token:
@@ -197,7 +243,7 @@ if __name__ == '__main__':
         #login information
         client.login()
         client.request_capabilities(tags=True, commands=True, membership=True)
-        client.join_channel('#channelname')
+        client.join_channel('#phunkroyal')
         
         #receive banner
         print(client.receive())

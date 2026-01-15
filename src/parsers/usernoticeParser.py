@@ -14,13 +14,13 @@ class UsernoticeParser(BaseParser):
         try:
             end = input.find(' :tmi.twitch.tv')
             if end == -1:
-                raise ValueError("USERNOTICE message is corrupted: no ' :'")
+                raise ValueError("(pares) USERNOTICE message is corrupted: no ' :'")
 
             raw_tags = self._parseTags(input[1:end])
 
             idx = input[end:].find(' #')
             if idx == -1:
-                raise ValueError("USERNOTICE message is corrupted: no '#'")
+                raise ValueError("(pares) USERNOTICE message is corrupted: no '#'")
             
             room = input[idx+1:].strip()
 
@@ -47,7 +47,7 @@ class UsernoticeParser(BaseParser):
 
 
         except Exception as e:
-            print(f'USERNOTICE is corrupted')
+            print(f'(pares) USERNOTICE is corrupted: {e}, ({tags.items()})')
             result = ParseResult('USERNOTICE', {}, input)
             result.is_valid = False
             result.error = str(e)
@@ -66,7 +66,7 @@ class UsernoticeParser(BaseParser):
             return tags
 
         except ValueError as e:
-            raise ValueError('PRIVMSG message is corrupted')
+            raise ValueError(f'(_parseTags) PRIVMSG message is corrupted: ({tags.items()})')
         
     def _parseSub(self, raw_tags:Dict[str,str], room:str) -> Dict[str,str]:
         """Parse sub / resub specific tags"""

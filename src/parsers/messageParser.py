@@ -17,21 +17,21 @@ class MessageParser(BaseParser):
             # find end of tags
             boundary = input.find(separator)
             if boundary == -1:
-                raise ValueError("PRIVMSG message is corrupted: cannot separate tags from message part")
+                raise ValueError(f"(parse) PRIVMSG message is corrupted: cannot separate tags from message part. ({separator}, {boundary})")
 
             raw_tags = self._parseTags(input[1:boundary])
 
             # find room name
             idx = input.find('#', boundary+2)
             if idx == -1:
-                raise ValueError("PRIVMSG message is corrupted: no '#' in message part")
+                raise ValueError("(parse) PRIVMSG message is corrupted: no '#' in message part")
         
             room = input[idx+1: input.find(' ', idx)]
 
             # find start of message
             idx = input.find(' :', idx)
             if idx == -1:
-                raise ValueError("PRIVMSG message is corrupted: no ' :' in message part")
+                raise ValueError("(parse) PRIVMSG message is corrupted: no ' :' in message part")
 
             message = input[idx+2:]
             
@@ -76,7 +76,7 @@ class MessageParser(BaseParser):
                                raw_message=input)
 
         except Exception as e:
-            print('PRIVMSG message is corrupted')
+            print(f'(parse) PRIVMSG message is corrupted: {e} ({tags.items()})')
             result = ParseResult(message_type='PRIVMSG',
                                  data={},
                                  raw_message=input)
@@ -95,9 +95,9 @@ class MessageParser(BaseParser):
             start +=  len('display-name=')
             end = input.find(';', start)
             if end == -1:
-                raise ValueError("PRIVMSG message is corrupted: no ';' after display-name")
+                raise ValueError("(_buildSeparator) PRIVMSG message is corrupted: no ';' after display-name")
             
-            return f' :{input[start:end]}'
+            return f' :{input[start:end]}'.lower()
 
 
         except Exception as e:
@@ -116,6 +116,6 @@ class MessageParser(BaseParser):
             return tags
 
         except ValueError as e:
-            raise ValueError('PRIVMSG message is corrupted')
+            raise ValueError(f'(_parseTags) PRIVMSG message is corrupted {tags.items()}')
 
     
