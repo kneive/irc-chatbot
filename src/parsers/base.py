@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any
+from typing import Optional
+from .tags.baseTag import BaseTag
 
 class ParseResult:
-    def __init__(self, message_type:str, data: Dict[str, Any], raw_message:str):
+    def __init__(self, message_type:str, data:BaseTag, raw_message:str):
         self.message_type = message_type
         self.data = data
         self.raw_message = raw_message

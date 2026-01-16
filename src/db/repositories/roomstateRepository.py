@@ -22,7 +22,7 @@ class RoomStateRepository:
         if entry:
             return Roomstate(room_id=entry[0],
                              timestamp=entry[1],
-                             follow_only=entry[2],
+                             followers_only=entry[2],
                              sub_only=entry[3],
                              emote_only=entry[4],
                              slow_mode=entry[5],
@@ -34,12 +34,12 @@ class RoomStateRepository:
         
         query = '''
                 INSERT OR REPLACE INTO roomstate
-                (room_id, timestamp, follow_only, sub_only, emote_only, 
+                (room_id, timestamp, followers_only, sub_only, emote_only, 
                 slow_mode, r9k)
                 VALUES (?,CURRENT_TIMESTAMP,?,?,?,?,?)
                 '''
         self.db.execute_query(query, (roomstate.room_id,
-                                      roomstate.follow_only,
+                                      roomstate.followers_only,
                                       roomstate.sub_only,
                                       roomstate.emote_only,
                                       roomstate.slow_mode,
@@ -49,4 +49,4 @@ class RoomStateRepository:
         """Check whether room_id exists in roomstate table"""
         
         query = 'SELECT 1 FROM roomstate WHERE room_id = ?'
-        return self.db.execute_query(query, (room_id))
+        return self.db.execute_query(query, (room_id,)) is not None

@@ -1,5 +1,6 @@
 from .base import BaseParser, ParseResult
 from typing import Optional, Dict
+from .tags.tagFactory import TagFactory
 
 class MessageParser(BaseParser):
 
@@ -26,57 +27,32 @@ class MessageParser(BaseParser):
             if idx == -1:
                 raise ValueError("(parse) PRIVMSG message is corrupted: no '#' in message part")
         
-            room = input[idx+1: input.find(' ', idx)]
+            raw_tags['room-name'] = input[idx+1: input.find(' ', idx)].strip()
 
             # find start of message
             idx = input.find(' :', idx)
             if idx == -1:
                 raise ValueError("(parse) PRIVMSG message is corrupted: no ' :' in message part")
 
-            message = input[idx+2:]
-            
-            tags = {}
-            
-            if 'source-room-id' in raw_tags:
-                tags['room-id'] = raw_tags.get('source-room-id')
-                tags['room-name'] = '#unknown'
+            if 'vip/1' in input:
+                raw_tags['vip'] = '1'
             else:
-                tags['room-id'] = raw_tags.get('room-id')
-                tags['room-name'] = room
+                raw_tags['vip'] = '0'
 
-            tags['user-id'] = raw_tags.get('user-id')
-            tags['display-name'] = raw_tags.get('display-name')
-            tags['username'] = raw_tags.get('display-name').lower()
-            tags['color'] = raw_tags.get('color')
-            tags['badges'] = raw_tags.get('badges')
-            tags['turbo'] = raw_tags.get('turbo')
-            tags['returning-chatter'] = raw_tags.get('returning-chatter')
-            tags['sub'] = raw_tags.get('subscriber','0')
-            if ('vip/1' in raw_tags.get('source-badges') or 
-                'vip/1' in raw_tags.get('badges')):
-                tags['vip'] = '1'
-            tags['mod'] = raw_tags.get('mod', '0')
-            tags['user-type'] = raw_tags.get('user-type')
+            if raw_tags.get('source-room-id')is not None:
+                raw_tags['msg-id'] = 'sharedchatnotice'
 
-            tags['msg-id'] = raw_tags.get('id')
-            tags['first-msg'] = raw_tags.get('first-msg')
-            tags['reply-msg-id'] = raw_tags.get('reply-parent-msg-id', 'null')
-            tags['reply-user-id'] = raw_tags.get('reply-parent-user-id', 'null')
-            tags['reply-display-name'] = raw_tags.get('reply-parent-display-name', 'null')
-            
-            tags['thread-msg-id'] = raw_tags.get('reply-thread-parent-msg-id', 'null')
-            tags['thread-user-id'] = raw_tags.get('reply-thread-parent-user-id', 'null')
-            tags['thread-display-name'] = raw_tags.get('reply-thread-parent-display-name', 'null')
-            
-            # tags['tags'] = raw_tags
-            tags['message-content'] = message
+            raw_tags['message-content'] = input[idx+2:]
+
+            tags = TagFactory.createPrivmsgTag(raw_tags)
 
             return ParseResult(message_type='PRIVMSG', 
                                data=tags, 
                                raw_message=input)
 
         except Exception as e:
-            print(f'(parse) PRIVMSG message is corrupted: {e} ({tags.items()})')
+            print(input)
+            print(f'(parse) PRIVMSG message is corrupted: {e.with_traceback} ({tags})')
             result = ParseResult(message_type='PRIVMSG',
                                  data={},
                                  raw_message=input)

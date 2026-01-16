@@ -31,4 +31,4 @@ class SubgiftRepository:
         """Check whether an entry for gift_id exists in subgift table"""
 
         query = 'SELECT 1 FROM subgift WHERE gift_id = ?'
-        return self.db.execute_query(query, (gift_id))
+        return self.db.execute_query(query, (gift_id,)) is not None

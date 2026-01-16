@@ -30,18 +30,18 @@ class UserRepository(Saltmine[User]):
 
         query = '''
                 INSERT OR REPLACE INTO user
-                (user_id, display_name, username, color, turbo)
-                VALUES (?,?,?,?,?)
+                (user_id, display_name, username, color, turbo, added)
+                VALUES (?,?,?,?,?, CURRENT_TIMESTAMP)
                 '''
-        self.db.execute_query(query, (User.user_id, 
-                                      User.display_name, 
-                                      User.username, 
-                                      User.color, 
-                                      User.turbo))
+        self.db.execute_query(query, (user.user_id, 
+                                      user.display_name, 
+                                      user.username, 
+                                      user.color, 
+                                      user.turbo))
 
     def exists(self, user_id:str) -> bool:
         """Check whether user_id exists in user table"""
 
-        query = 'SELECT 1 FROM user WHERE id = ?'
-        return self.db.execute_query(query, (user_id))
+        query = 'SELECT 1 FROM user WHERE user_id = ?'
+        return self.db.execute_query(query, (user_id,)) is not None
         

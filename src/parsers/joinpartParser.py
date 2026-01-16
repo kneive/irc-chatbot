@@ -29,7 +29,8 @@ class JoinPartParser(BaseParser):
                                    input)
         
         except Exception as e:
-            print(f'(parse) {type} message is corrupted: {e}, ({tags.items()})' )
+            print(input)
+            print(f'(parse) {type} message is corrupted: {e.with_traceback}, ({tags})' )
             result = ParseResult(type, {}, input)
             result.is_valid = False
             result.error = str(e)

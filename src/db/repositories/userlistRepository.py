@@ -30,5 +30,4 @@ class UserlistRepository:
         """
         
         query = 'SELECT 1 FROM userlist WHERE room_name = ? AND display_name = ?'
-        return self.db.execute_query(query, (room_name,
-                                             display_name))
+        return self.db.execute_query(query, (room_name, display_name,)) is not None

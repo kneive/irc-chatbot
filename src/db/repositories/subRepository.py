@@ -38,4 +38,4 @@ class SubRepository:
         room_id and user_id"""
 
         query = 'SELECT 1 FROM subs WHERE room_id = ? AND user_id = ?'
-        return self.db.execute_query(query, (room_id, user_id))
+        return self.db.execute_query(query, (room_id, user_id,)) is not None

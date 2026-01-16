@@ -29,6 +29,6 @@ class BitsRepository:
         Check whether at least one entry for user_id and room_id 
         exists in bits table
         """
+        
         query = 'SELECT 1 FROM bits WHERE user_id = ? AND room_id = ?'
-        return self.db.execute_query(query, (user_id, 
-                                             room_id))
+        return self.db.execute_query(query, (user_id, room_id,)) is not None

@@ -4,19 +4,19 @@ from .baseTag import BaseTag
 @dataclass
 class SubTag(BaseTag):
 
-    sub:str = ''
-    vip:str = ''
-    mod:str = ''
+    sub:str = 'null'
+    vip:str = 'null'
+    mod:str = 'null'
 
-    months:str = ''
-    cumulative_months:str = ''
-    multimonth_duration:str = ''
-    multimonth_tenure:str = ''
-    should_share_streak:str = ''
+    months:str = 'null'
+    cumulative_months:str = 'null'
+    multimonth_duration:str = 'null'
+    multimonth_tenure:str = 'null'
+    should_share_streak:str = 'null'
 
-    sub_plan_name:str = ''
-    sub_plan:str = ''
-    was_gifted:str = ''
+    sub_plan_name:str = 'null'
+    sub_plan:str = 'null'
+    was_gifted:str = 'null'
 
-    msg_id:str = ''
-    source_msg_id:str = ''
+    #msg_id:str = 'null'
+    #source_msg_id:str = 'null'

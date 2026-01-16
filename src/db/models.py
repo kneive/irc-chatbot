@@ -31,13 +31,13 @@ class Raid:
 @dataclass
 class Room:
     room_id:str | None = None
-    name:str='unknown'
+    room_name:str='unknown'
 
 @dataclass
 class Roomstate:
     room_id: str | None = None
     timestamp: datetime | None = None
-    follow_only: int = 0
+    followers_only: int = 0
     sub_only: int = 0
     emote_only: int = 0
     slow_mode: int = 0

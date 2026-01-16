@@ -17,8 +17,8 @@ class DatabaseManager:
                     timestamp TIMESTAMP,
                     source_room_id TEXT,
                     bits INTEGER DEFAULT 0,
-                    FOREIGN KEY (room_id) REFERENCES room (id),
-                    FOREIGN KEY (user_id) REFERENCES user (id)
+                    FOREIGN KEY (room_id) REFERENCES room (room_id),
+                    FOREIGN KEY (user_id) REFERENCES user (user_id)
                 )
             ''')
 
@@ -34,8 +34,8 @@ class DatabaseManager:
                     thread_message_id TEXT,
                     thread_user_id TEXT,
                     thread_display_name TEXT,
-                    FOREIGN KEY (room_id) REFERENCES room (id),
-                    FOREIGN KEY (user_id) REFERENCES user (id)
+                    FOREIGN KEY (room_id) REFERENCES room (room_id),
+                    FOREIGN KEY (user_id) REFERENCES user (user_id)
                 )
             ''')
 
@@ -46,8 +46,8 @@ class DatabaseManager:
                     timestamp TIMESTAMP,
                     source_room_id TEXT,
                     viewer_count INTEGER DEFAULT 0,
-                    FOREIGN KEY (room_id) REFERENCES room (id),
-                    FOREIGN KEY (user_id) REFERENCES user (id)
+                    FOREIGN KEY (room_id) REFERENCES room (room_id),
+                    FOREIGN KEY (user_id) REFERENCES user (user_id)
                 )
             ''')
 
@@ -63,12 +63,12 @@ class DatabaseManager:
                 CREATE TABLE IF NOT EXISTS roomstate (
                     room_id TEXT PRIMARY KEY,
                     timestamp TIMESTAMP,
-                    follow_only INTEGER DEFAULT 0,
+                    followers_only INTEGER DEFAULT 0,
                     sub_only INTEGER DEFAULT 0,
                     emote_only INTEGER DEFAULT 0,
                     slow_mode INTEGER DEFAULT 0,
                     r9k INTEGER DEFAULT 0,
-                    FOREIGN KEY (room_id) REFERENCES room (id))
+                    FOREIGN KEY (room_id) REFERENCES room (room_id))
             ''')
 
             conn.execute('''
@@ -86,8 +86,8 @@ class DatabaseManager:
                     streak_months INTEGER DEFAULT 0,
                     share_streak INTEGER DEFAULT 0,
                     cumulative INTEGER DEFAULT 0,
-                    FOREIGN KEY (room_id) REFERENCES room (id),
-                    FOREIGN KEY (user_id) REFERENCES user (id)
+                    FOREIGN KEY (room_id) REFERENCES room (room_id),
+                    FOREIGN KEY (user_id) REFERENCES user (user_id)
                 )
             ''')
 
@@ -100,8 +100,8 @@ class DatabaseManager:
                     gift_count INTEGER DEFAULT 0,
                     gifter_total INTEGER DEFAULT 0,
                     sub_plan TEXT,
-                    FOREIGN KEY (room_id) REFERENCES room (id),
-                    FOREIGN KEY (user_id) REFERENCES user (id)
+                    FOREIGN KEY (room_id) REFERENCES room (room_id),
+                    FOREIGN KEY (user_id) REFERENCES user (user_id)
                 )
             ''')
 
@@ -130,8 +130,8 @@ class DatabaseManager:
                     badges TEXT,
                     user_type TEXT,
                     PRIMARY KEY (room_id, user_id),
-                    FOREIGN KEY (room_id) REFERENCES room (id),
-                    FOREIGN KEY (user_id) REFERENCES user (id)
+                    FOREIGN KEY (room_id) REFERENCES room (room_id),
+                    FOREIGN KEY (user_id) REFERENCES user (user_id)
                 )
             ''')
 
@@ -148,12 +148,24 @@ class DatabaseManager:
             conn.execute('CREATE INDEX IF NOT EXISTS idx_user_in_room_last_seen ON user_in_room (room_id, last_seen)')
             conn.execute('CREATE INDEX IF NOT EXISTS idx_subs_room_time ON subs (room_id, timestamp)')
 
-    def execute_query(self, query:str, params:tuple=()):
+    def execute_query(self, query:str, params:tuple=()) -> Optional[tuple]:
         """Execute a query against the database"""
 
-        pass
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.execute(query, params)
+                return cursor.fetchone()
+        except Exception as e:
+            print(f'Database query error: {e}')
+            return None
 
-    def execute_query_all(self, query:str, params:tuple=()) -> Optional[List[tuple]]:
+    def execute_query_all(self, query:str, params:tuple=()) -> List[tuple]:
         """Execute a query and return all results"""
 
-        pass
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.execute(query, params)
+                return cursor.fetchall()
+        except Exception as e:
+            print(f'Database query error: {e}')
+            return []

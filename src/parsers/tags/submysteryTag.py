@@ -4,15 +4,15 @@ from dataclasses import dataclass
 @dataclass
 class SubmysterygiftTag(BaseTag):
 
-    sub:str = ''
-    vip:str = ''
-    mod:str = ''
+    sub:str = 'null'
+    vip:str = 'null'
+    mod:str = 'null'
 
-    gift_id:str = ''
-    origin_id:str = ''
-    sub_plan:str = ''
-    mass_gift_count:str = ''
-    sender_count:str = ''
+    gift_id:str = 'null'
+    origin_id:str = 'null'
+    sub_plan:str = 'null'
+    mass_gift_count:str = 'null'
+    sender_count:str = 'null'
     
-    msg_id:str = ''
-    source_msg_id:str = ''
+    #msg_id:str = 'null'
+    #source_msg_id:str = 'null'

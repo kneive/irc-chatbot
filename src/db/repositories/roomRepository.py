@@ -19,11 +19,10 @@ class RoomRepository(Saltmine[Room]):
                 (room_id, room_name, added) 
                 VALUES (?,?, CURRENT_TIMESTAMP)
                 '''
-        self.db.execute_query(query, (Room.room_id, 
-                                      Room.room_name))
+        self.db.execute_query(query, (room.room_id, room.room_name))
 
     def exists(self, room_id:str) -> bool:
         """Checks whether room_id exists in room table"""
 
-        query= 'SELECT 1 FROM room WHERE id = ?'
-        return self.db.execute_query(query, (room_id))
+        query = 'SELECT 1 FROM room WHERE room_id = ?'
+        return self.db.execute_query(query, (room_id,)) is not None

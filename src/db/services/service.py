@@ -1,3 +1,4 @@
+
 from ..repositories import (BitsRepository, 
                             MessageRepository,
                             RaidRepository,
@@ -7,15 +8,27 @@ from ..repositories import (BitsRepository,
                             SubgiftRepository,
                             UserRepository,  
                             UserInRoomRepository,
-                            UserlistRepository 
-                            )
+                            UserlistRepository)
 from ..models import (User, 
-                      Room, 
+                      Room,
+                      Roomstate, 
                       UserInRoom, 
                       MessageInRoom, 
                       Sub, 
                       Subgift, 
                       UserListEntry)
+
+from parsers.tags.baseTag import BaseTag
+from parsers.tags.privmsgTag import PrivmsgTag
+from parsers.tags.roomstateTag import RoomstateTag
+from parsers.tags.subgiftTag import SubgiftTag
+from parsers.tags.submysteryTag import SubmysterygiftTag
+from parsers.tags.subTag import SubTag
+
+from dataclasses import fields
+
+MISSING_NUM = -1
+MISSING_STR = 'null'
 
 class SaltyService:
 
@@ -51,113 +64,155 @@ class SaltyService:
         
         if parsed.message_type == 'PRIVMSG':
             self._handlePrivMessage(parsed.data)
-        elif parsed.message_type == 'USERNOTICE':
-            self._handleUserNotice(parsed.data)
+        elif parsed.message_type == 'SUBSCRIPTION':
+            self._handleSubscription(parsed.data)
+        elif parsed.message_type == 'SUBGIFT':
+            self._handleSubgift(parsed.data)
+        elif parsed.message_type == 'SUBMYSTERYGIFT':
+            self._handleSubmysterygift(parsed.data)
         elif parsed.message_type == 'ROOMSTATE':
-            pass
+            self._handleRoomstate(parsed.data)
         elif parsed.message_type == 'JOIN':
             self._handleJoin(parsed.data)
         elif parsed.message_type == 'PART':
             self._handlePart(parsed.data)
 
-    def _handlePrivMessage(self, data:dict) -> None:
+    def _handlePrivMessage(self, data:PrivmsgTag) -> None:
         """Handles PRIVMSG messages"""
 
-        # check whether user exists in user table
-        if not self.user_repo.exists(user_id=data.get('user-id')):
+        if data.msg_id == 'sharedchatnotice':
+  
+            self._checkUserRoomUserInRoom(data)
+
+            # add message to message_in_room table
+            self.message_repo.save(MessageInRoom(message_id=data.id,
+                                                 room_id=data.source_room_id,
+                                                 user_id=data.user_id,
+                                                 reply_message_id=data.reply_parent_msg_id,
+                                                 reply_user_id=data.reply_parent_user_id,
+                                                 reply_display_name=data.reply_parent_display_name,
+                                                 thread_message_id=data.reply_thread_parent_msg_id,
+                                                 thread_user_id=data.reply_thread_parent_user_id,
+                                                 thread_display_name=data.reply_thread_parent_display_name,
+                                                 content=data.message_content))
+
+        else:
+
+            self._checkUserRoomUserInRoom(data)
+
+            # add message to message_in_room table
+            self.message_repo.save(MessageInRoom(message_id=data.id,
+                                                 room_id=data.room_id,
+                                                 user_id=data.user_id,
+                                                 reply_message_id=data.reply_parent_msg_id,
+                                                 reply_user_id=data.reply_parent_user_id,
+                                                 reply_display_name=data.reply_parent_display_name,
+                                                 thread_message_id=data.reply_thread_parent_msg_id,
+                                                 thread_user_id=data.reply_thread_parent_user_id,
+                                                 thread_display_name=data.reply_thread_parent_display_name,
+                                                 content=data.message_content))
+
+    def _handleSubscription(self, data:SubTag) -> None:
+        """Handles SUB messages"""
+
+        self._checkUserRoomUserInRoom(data)
+
+        if data.msg_id == 'sharedchatnotice':
+    
+            self.sub_repo.save(Sub(user_id=data.user_id,
+                                   room_id=data.source_room_id,
+                                   message_id=data.id,
+                                   gift_id=MISSING_STR,
+                                   sub_plan=data.sub_plan,
+                                   months=int(data.months),
+                                   gift_months=MISSING_NUM,
+                                   multimonth_duration=int(data.multimonth_duration),
+                                   multimonth_tenure=int(data.multimonth_tenure),
+                                   streak_months=MISSING_NUM,
+                                   share_streak=int(data.should_share_streak),
+                                   cumulative=int(data.cumulative_months)))
             
-            self.user_repo.save(User(user_id=data.get('user-id'),
-                                     display_name=data.get('display-name'),
-                                     username=data.get('username'),
-                                     color=data.get('color'),
-                                     turbo=int(data.get('turbo'))))
-
-        # check whether room exists in room table
-        if not self.room_repo.exists(room_id=data.get('room-id')):
-
-            self.room_repo.save(Room(room_id=data.get('room-id'),
-                                     room_name=data.get('room-name')))
-
-        # check whether user exists in user_in_room table
-        if not self.userInRoom_repo.exists(room_id=data.get('room-id'),
-                                           user_id=data.get('user-id')):
+        else:
             
-            self.userInRoom_repo.save(UserInRoom(room_id=data.get('room-id'),
-                                                 user_id=data.get('user-id'),
-                                                 returning_chatter=int(data.get('returning-chatter')),
-                                                 first_message=int(data.get('first-msg')),
-                                                 sub=int(data.get('sub')),
-                                                 vip=int(data.get('vip')),
-                                                 mod=int(data.get('mod')),
-                                                 badges=data.get('badges'),
-                                                 user_type=data.get('user-type')))
+            self.sub_repo.save(Sub(user_id=data.user_id,
+                                   room_id=data.room_id,
+                                   message_id=data.id,
+                                   gift_id=MISSING_STR,
+                                   sub_plan=data.sub_plan,
+                                   months=int(data.months),
+                                   gift_months=MISSING_NUM,
+                                   multimonth_duration=int(data.multimonth_duration),
+                                   multimonth_tenure=int(data.multimonth_tenure),
+                                   streak_months=MISSING_NUM,
+                                   share_streak=int(data.should_share_streak),
+                                   cumulative=int(data.cumulative_months)))
 
-        # add message to message_in_room table
-        self.message_repo.save(MessageInRoom(message_id=data.get(msg-id),
-                                             room_id=data.get('room-id'),
-                                             user_id=data.get('user-id'),
-                                             reply_message_id=data.get('reply-msg-id'),
-                                             reply_user_id=data.get('reply-user-id'),
-                                             reply_display_name=data.get('reply-display-name'),
-                                             thread_message=data.get('thread-msg-id'),
-                                             thread_user_id=data.get('thread-user-id'),
-                                             thread_display_name=data.get('thread-display-name'),
-                                             content=data.get('message-content')))
 
-    def _handleUserNotice(self, data:dict) -> None:
-        """Handles USERNOTICE messages"""
+    def _handleSubgift(self, data:SubgiftTag) -> None:
+        """Handles SUBGIFT messages"""
 
-        # check whether user exists in user table
-        if not self.user_repo.exists(user_id=data.get('user-id')):
+        self._checkUserRoomUserInRoom(data)
+
+        if data.msg_id == 'sharedchatnotice':
+
+            self.subgift_repo.save(Subgift(user_id=data.user_id,
+                                           room_id=data.source_room_id,
+                                           gift_id=data.gift_id,
+                                           gift_count=MISSING_NUM,
+                                           gifter_total=int(data.sender_count),
+                                           sub_plan=data.sub_plan))
+
+        else:        
+
+            self.subgift_repo.save(Subgift(user_id=data.user_id,
+                                           room_id=data.room_id,
+                                           gift_id=data.gift_id,
+                                           gift_count=MISSING_NUM,
+                                           gifter_total=int(data.sender_count),
+                                           sub_plan=data.sub_plan))
+
+    def _handleSubmysterygift(self, data:SubmysterygiftTag) -> None:
+        """Handles SAUBMYSTERYGIFT messages"""
+
+        self._checkUserRoomUserInRoom(data)
+
+        if data.msg_id == 'sharedchatnotice':
             
-            self.user_repo.save(User(user_id=data.get('user-id'),
-                                     display_name=data.get('display-name'),
-                                     username=data.get('username'),
-                                     color=data.get('color'),
-                                     turbo=int(data.get('turbo'))))
+            self.subgift_repo.save(Subgift(user_id=data.user_id,
+                                           room_id=data.source_room_id,
+                                           gift_id=data.gift_id,
+                                           gift_count=int(data.mass_gift_count),
+                                           gifter_total=int(data.sender_count),
+                                           sub_plan=data.sub_plan))
 
-        # check whether room exists in room table
-        if not self.room_repo.exists(room_id=data.get('room-id')):
+        else:
 
-            self.room_repo.save(Room(room_id=data.get('room-id'),
-                                     room_name=data.get('room-name')))
+            self.subgift_repo.save(Subgift(user_id=data.user_id,
+                                           room_id=data.room_id,
+                                           gift_id=data.gift_id,
+                                           gift_count=int(data.mass_gift_count),
+                                           gifter_total=int(data.sender_count),
+                                           sub_plan=data.sub_plan))
 
-        # check whether user exists in user_in_room table
-        if not self.userInRoom_repo.exists(room_id=data.get('room-id'),
-                                           user_id=data.get('user-id')):
-            
-            self.userInRoom_repo.save(UserInRoom(room_id=data.get('room-id'),
-                                                 user_id=data.get('user-id'),
-                                                 returning_chatter=int(data.get('returning-chatter')),
-                                                 first_message=int(data.get('first-msg')),
-                                                 sub=int(data.get('sub')),
-                                                 vip=int(data.get('vip')),
-                                                 mod=int(data.get('mod')),
-                                                 badges=data.get('badges'),
-                                                 user_type=data.get('user-type')))
+    def _handleRoomstate(self, data:RoomstateTag) -> None:
+        """Handles ROOMSTATE messages"""
 
-        # add sub
-        if data.get('msg-id') in ['subgift', 'submysterygift']:
-            self.subgift_repo.save(Subgift(user_id=data.get('user-id'),
-                                           room_id=data.get('room-id'),
-                                           gift_id=data.get('gift-id'),
-                                           gift_count=int(data.get('gift-count')),
-                                           gifter_total=int(data.get('gifter-total')),
-                                           sub_plan=data.get('sub-plan')))
-        
-        elif data.get('msg-id') in ['sub', 'resub', 'subgift']:
-            self.sub_repo.save(Sub(user_id=data.get('user-id'),
-                                    room_id=data.get('room-id'),
-                                    message_id=data.get('msg-id'),
-                                    gift_id=data.get('gift-id', '-1'),
-                                    sub_plan=data.get('sub-plan'),
-                                    months=int(data.get('months')),
-                                    gift_months=int(data.get('gift-months', '-1')),
-                                    multimonth_duration=int(data.get('multimonth-duration')),
-                                    multimonth_tenure=int(data.get('multimonth-tenure')),
-                                    streak_months=int(data.get('streak-months', '-1')),
-                                    share_streak=int(data.get('share-streak')),
-                                    cumulative=int(data.get('cumulative'))))
+        roomstate = self.roomstate.repo.get_by_room_id(room_id=data.room_id)
+
+        for f in fields(data):
+            key = f.name
+            value = getattr(data, key)
+
+            if value == '-1':
+                setattr(data, key, getattr(roomstate, key))
+
+        self.roomstate_repo.save(Roomstate(room_id=data.room_id,
+                                           follow_only=int(data.followers_only),
+                                           sub_only=int(data.sub_only),
+                                           emote_only=int(data.emote_only),
+                                           slow_mode=int(data.slow_mode),
+                                           r9k=int(data.r9k)))
+
 
     def _handleJoin(self, data:dict) -> None:
         """Handles JOIN messages"""
@@ -172,3 +227,71 @@ class SaltyService:
         self.userlist_repo.save(UserListEntry(room_name=data.get('room-name'),
                                               display_name=data.get('display-name'),
                                               join_part=data.get('msg-type')))
+
+# Helpers
+
+    def _checkUserRoomUserInRoom(self, data:BaseTag) -> None:
+
+        if data.msg_id == 'sharedchatnotice':
+
+
+            if not self.user_repo.exists(user_id=data.user_id):
+            
+                # check whether user exists in user table
+                self.user_repo.save(User(user_id=data.user_id,
+                                        display_name=data.display_name,
+                                        username=data.username,
+                                        color=data.color,
+                                        turbo=int(data.turbo)))
+
+            # check whether room and source-room exist in room table
+            if not self.room_repo.exists(room_id=data.source_room_id):
+
+                self.room_repo.save(Room(room_id=data.source_room_id,
+                                        room_name=data.room_name))
+
+            # check whether user exists in user_in_room table
+            if not self.userInRoom_repo.exists(room_id=data.source_room_id, user_id=data.user_id):
+                
+                print(data.room_id, data.user_id)
+
+                self.userInRoom_repo.save(UserInRoom(room_id=data.source_room_id,
+                                                     user_id=data.user_id,
+                                                     returning_chatter=int(data.returning_chatter),
+                                                     first_message=int(data.first_msg),
+                                                     sub=int(data.sub),
+                                                     vip=int(data.vip),
+                                                     mod=int(data.mod),
+                                                     badges=data.source_badges,
+                                                     user_type=data.user_type))
+        
+        else:
+
+            # check whether user exists in user table
+            if not self.user_repo.exists(user_id=data.user_id):
+                
+                self.user_repo.save(User(user_id=data.user_id,
+                                         display_name=data.display_name,
+                                         username=data.username,
+                                         color=data.color,
+                                         turbo=int(data.turbo)))
+
+            # check whether room and source-room exist in room table
+            if not self.room_repo.exists(room_id=data.room_id):
+
+                self.room_repo.save(Room(room_id=data.room_id,
+                                         room_name=data.room_name))
+
+
+            # check whether user exists in user_in_room table
+            if not self.userInRoom_repo.exists(room_id=data.room_id, user_id=data.user_id):
+                
+                self.userInRoom_repo.save(UserInRoom(room_id=data.room_id,
+                                                     user_id=data.user_id,
+                                                     returning_chatter=int(data.returning_chatter),
+                                                     first_message=int(data.first_msg),
+                                                     sub=int(data.sub),
+                                                     vip=int(data.vip),
+                                                     mod=int(data.mod),
+                                                     badges=data.badges,
+                                                     user_type=data.user_type))

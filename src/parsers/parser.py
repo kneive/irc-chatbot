@@ -2,7 +2,7 @@ from .base import ParseResult
 from .joinpartParser import JoinPartParser
 from .messageParser import MessageParser
 from .usernoticeParser import UsernoticeParser
-from typing import Optional, List
+from typing import Optional
 
 
 class Saltshaker:

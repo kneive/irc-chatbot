@@ -38,7 +38,7 @@ class MessageRepository(Saltmine[MessageInRoom]):
         """Checks whether message_id exists in message_in_room table"""
 
         query = 'SELECT 1 FROM message_in_room WHERE message_id = ?'
-        return self.db.execute_query(query, (message_id))
+        return self.db.execute_query(query, (message_id,)) is not None
 
 
 
