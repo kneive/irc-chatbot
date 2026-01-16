@@ -11,6 +11,16 @@ class DatabaseManager:
         with sqlite3.connect(self.db_path) as conn:
 
             conn.execute('''
+                CREATE TABLE IF NOT EXISTS announcement (
+                    room_id TEXT,
+                    user_id TEXT,
+                    display_name TEXT,
+                    timestamp TIMESTAMP,
+                    msg_content TEXT
+                )             
+            ''')
+
+            conn.execute('''
                 CREATE TABLE IF NOT EXISTS bits (
                     user_id TEXT,
                     room_id TEXT,
@@ -141,6 +151,16 @@ class DatabaseManager:
                     display_name TEXT,
                     join_part TEXT,
                     timestamp TIMESTAMP)
+            ''')
+
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS viewermilestone(
+                    room_id TEXT,
+                    user_id TEXT,
+                    display_name TEXT,
+                    timestamp TIMESTAMP,
+                    streak INTEGER DEFAULT 0
+                )
             ''')
 
             conn.execute('CREATE INDEX IF NOT EXISTS idx_message_room_time ON message_in_room (room_id, timestamp)')

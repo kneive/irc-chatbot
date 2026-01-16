@@ -1,6 +1,7 @@
 from .base import BaseParser, ParseResult
 from .tags.tagFactory import TagFactory
 from typing import Optional, Dict
+import traceback
 
 class RoomstateParser(BaseParser):
 
@@ -27,7 +28,8 @@ class RoomstateParser(BaseParser):
 
         except Exception as e:
             print(input)
-            print(f'(parse) ROOMSTATE message is corrupted: {e.with_traceback} ({tags})')
+            print(f'(parse) ROOMSTATE message is corrupted: {e} ({tags})')
+            print(f'Traceback: {traceback.format_exc()}')
             result = ParseResult(message_type='ROOMSTATE',
                                  data={},
                                  raw_message=input)

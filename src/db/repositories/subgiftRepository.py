@@ -13,7 +13,7 @@ class SubgiftRepository:
 
     def save(self, subgift:Subgift) -> None:
         """Insert an entry into subgift table"""
-        
+
         query = '''
                 INSERT INTO subgift
                 (user_id, room_id, timestamp, gift_id, gift_count, gifter_total, 

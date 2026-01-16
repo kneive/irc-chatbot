@@ -1,10 +1,12 @@
 import socket
 import ssl
 import threading
+import traceback
 from auth import get_token
 from pathlib import Path
 from parsers.parser import Saltshaker
-from db.repositories import (BitsRepository, 
+from db.repositories import (AnnouncementRepository,
+                             BitsRepository, 
                              MessageRepository, 
                              RaidRepository, 
                              RoomRepository, 
@@ -13,7 +15,8 @@ from db.repositories import (BitsRepository,
                              SubRepository, 
                              UserInRoomRepository, 
                              UserlistRepository, 
-                             UserRepository)
+                             UserRepository,
+                             ViewerMilestoneRepository)
 
 from db.services.service import SaltyService
 from db.database import DatabaseManager
@@ -21,7 +24,13 @@ from db.database import DatabaseManager
 PROJECT_ROOT = Path(__file__).parent.parent
 KEYS = PROJECT_ROOT / 'keyz'
 LOGINDATA = KEYS / 'logins.key'
-LOGFILE = PROJECT_ROOT / 'logs' / 'edopeh.log'
+
+LOGFILE = PROJECT_ROOT / 'logs' / 'log.log'
+
+TOKEN = get_token()
+NICKNAME = 'nickname'
+
+CHANNELLIST = ['roomname',]
 
 class IRCClient:
     def __init__(self, nick, token, server='irc.chat.twitch.tv', port=6697, 
@@ -37,6 +46,7 @@ class IRCClient:
         self.log_handle = None
 
         db_manager = DatabaseManager('saltmine.db')
+        announcement_repo = AnnouncementRepository(db_manager)
         bits_repo = BitsRepository(db_manager)
         message_repo = MessageRepository(db_manager)
         raid_repo = RaidRepository(db_manager)
@@ -47,8 +57,10 @@ class IRCClient:
         user_repo = UserRepository(db_manager)
         userInRoom_repo = UserInRoomRepository(db_manager)
         userlist_repo = UserlistRepository(db_manager)
+        viewerMilestone_repo = ViewerMilestoneRepository(db_manager)
 
-        self.service = SaltyService(bits_repo=bits_repo,
+        self.service = SaltyService(announcement_repo=announcement_repo,
+                                    bits_repo=bits_repo,
                                     message_repo=message_repo,
                                     raid_repo=raid_repo,
                                     room_repo=room_repo,
@@ -57,7 +69,8 @@ class IRCClient:
                                     subgift_repo=subgift_repo,
                                     user_repo=user_repo,
                                     userInRoom_repo=userInRoom_repo,
-                                    userlist_repo=userlist_repo)
+                                    userlist_repo=userlist_repo,
+                                    viewerMilestone_repo=viewerMilestone_repo)
         
         self.parser = Saltshaker()
 
@@ -160,9 +173,9 @@ class IRCClient:
 
 
     def parse_line(self, line):
-        """Parse a single line received from the server"""
+        """Parse a single line received from theroomstate server"""
         
-        # output raw line
+        #output raw line
         #print(line)
 
         # log raw line
@@ -183,7 +196,8 @@ class IRCClient:
                 self.service.process_message(parsed)
         except Exception as e:
             print(line)
-            print(f'Error processing line: {e.with_traceback}')
+            print(f'(main) Error processing line: {e}')
+            print(f'Traceback: {traceback.format_exc()}')
 
     def input(self, default_channel=None):
         """Read user input and send to server"""
@@ -232,22 +246,17 @@ class IRCClient:
 
 if __name__ == '__main__':
 
-    nick = 'randomline95'
-    token = get_token()
-
-    if not nick or not token:
+    if not NICKNAME or not TOKEN:
         print('Missing NICKNAME or AUTH TOKEN')
         exit(1)
 
-    client = IRCClient(nick=nick, token=token, use_ssl=True)
+    client = IRCClient(nick=NICKNAME, token=TOKEN, use_ssl=True)
 
     if client.connect():
 
         #login information
         client.login()
-        client.request_capabilities(tags=True, commands=True, membership=True)
-        client.join_channel('#moondye7')
-        client.join_channel('#bonjwa')
+        client.request_capabilities(tags=True, commands=True, membership=True)        
         
         #receive banner
         print(client.receive())
@@ -260,7 +269,8 @@ if __name__ == '__main__':
         print("Type 'say <message>' to chat, 'join #channel' to join another channel, or 'quit' to leave the server.")
 
         try:
-            client.input(default_channel=f'#{nick}')
+            client.input(f'#{CHANNELLIST[0]}')
+
         except KeyboardInterrupt:
             print('\nClosing connection...')
         finally:

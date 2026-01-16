@@ -2,12 +2,16 @@ from .base import ParseResult
 from .joinpartParser import JoinPartParser
 from .messageParser import MessageParser
 from .usernoticeParser import UsernoticeParser
+from .roomstateParser import RoomstateParser
 from typing import Optional
 
 
 class Saltshaker:
     def __init__(self):
-        self.parsers = [JoinPartParser(),MessageParser(), UsernoticeParser()]
+        self.parsers = [JoinPartParser(),
+                        MessageParser(), 
+                        UsernoticeParser(), 
+                        RoomstateParser()]
 
     def parse(self, input:str) -> Optional[ParseResult]:
         """Chooses appropriate parser and parses input"""

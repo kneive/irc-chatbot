@@ -2,6 +2,13 @@ from dataclasses import dataclass
 from datetime import datetime
 
 @dataclass
+class Announcement:
+    room_id:str | None = None
+    user_id:str | None = None
+    display_name:str=''
+    msg_content:str=''
+
+@dataclass
 class Bits:
     user_id:str | None = None
     room_id:str | None = None
@@ -93,3 +100,10 @@ class UserListEntry:
     room_name:str | None = None
     display_name:str | None = None
     join_part:str | None = None
+
+@dataclass
+class ViewerMilestone:
+    room_id:str | None = None
+    user_id:str | None = None
+    display_name:str=''
+    streak:int=0

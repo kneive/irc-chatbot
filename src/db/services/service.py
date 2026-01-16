@@ -1,5 +1,6 @@
 
-from ..repositories import (BitsRepository, 
+from ..repositories import (AnnouncementRepository,
+                            BitsRepository, 
                             MessageRepository,
                             RaidRepository,
                             RoomRepository,
@@ -8,22 +9,27 @@ from ..repositories import (BitsRepository,
                             SubgiftRepository,
                             UserRepository,  
                             UserInRoomRepository,
-                            UserlistRepository)
-from ..models import (User, 
+                            UserlistRepository,
+                            ViewerMilestoneRepository)
+from ..models import (Announcement,
+                      User, 
                       Room,
                       Roomstate, 
                       UserInRoom, 
                       MessageInRoom, 
                       Sub, 
                       Subgift, 
-                      UserListEntry)
+                      UserListEntry,
+                      ViewerMilestone)
 
-from parsers.tags.baseTag import BaseTag
-from parsers.tags.privmsgTag import PrivmsgTag
-from parsers.tags.roomstateTag import RoomstateTag
-from parsers.tags.subgiftTag import SubgiftTag
-from parsers.tags.submysteryTag import SubmysterygiftTag
-from parsers.tags.subTag import SubTag
+from parsers.tags import (AnnouncementTag, 
+                          BaseTag, 
+                          PrivmsgTag, 
+                          RoomstateTag, 
+                          SubgiftTag, 
+                          SubmysterygiftTag,
+                          SubTag, 
+                          ViewerMilestoneTag)
 
 from dataclasses import fields
 
@@ -33,6 +39,7 @@ MISSING_STR = 'null'
 class SaltyService:
 
     def __init__(self,
+                 announcement_repo: AnnouncementRepository,
                  bits_repo: BitsRepository,
                  message_repo: MessageRepository,
                  raid_repo: RaidRepository,
@@ -42,8 +49,10 @@ class SaltyService:
                  subgift_repo: SubgiftRepository,
                  user_repo: UserRepository,
                  userInRoom_repo: UserInRoomRepository,
-                 userlist_repo: UserlistRepository):
+                 userlist_repo: UserlistRepository,
+                 viewerMilestone_repo: ViewerMilestoneRepository):
         
+        self.announcement_repo = announcement_repo
         self.bits_repo = bits_repo
         self.message_repo = message_repo
         self.raid_repo = raid_repo
@@ -54,6 +63,7 @@ class SaltyService:
         self.user_repo = user_repo
         self.userInRoom_repo = userInRoom_repo
         self.userlist_repo = userlist_repo
+        self.viewerMilestone_repo = viewerMilestone_repo
 
     def process_message(self, parsed: dict) -> None:
         """Process parsed message"""
@@ -72,6 +82,10 @@ class SaltyService:
             self._handleSubmysterygift(parsed.data)
         elif parsed.message_type == 'ROOMSTATE':
             self._handleRoomstate(parsed.data)
+        elif parsed.message_type == 'ANNOUNCEMENT':
+            self._handleAnnouncement(parsed.data)
+        elif parsed.message_type == 'VIEWERMILESTONE':
+            self._handleViewerMilestone(parsed.data)
         elif parsed.message_type == 'JOIN':
             self._handleJoin(parsed.data)
         elif parsed.message_type == 'PART':
@@ -162,7 +176,7 @@ class SaltyService:
                                            gifter_total=int(data.sender_count),
                                            sub_plan=data.sub_plan))
 
-        else:        
+        else:
 
             self.subgift_repo.save(Subgift(user_id=data.user_id,
                                            room_id=data.room_id,
@@ -177,7 +191,7 @@ class SaltyService:
         self._checkUserRoomUserInRoom(data)
 
         if data.msg_id == 'sharedchatnotice':
-            
+
             self.subgift_repo.save(Subgift(user_id=data.user_id,
                                            room_id=data.source_room_id,
                                            gift_id=data.gift_id,
@@ -197,21 +211,56 @@ class SaltyService:
     def _handleRoomstate(self, data:RoomstateTag) -> None:
         """Handles ROOMSTATE messages"""
 
-        roomstate = self.roomstate.repo.get_by_room_id(room_id=data.room_id)
+        if self.roomstate_repo.exists(room_id=data.room_id):
+            roomstate = self.roomstate_repo.get_by_id(room_id=data.room_id)
 
-        for f in fields(data):
-            key = f.name
-            value = getattr(data, key)
+            for f in fields(data):
+                key = f.name
+                value = getattr(data, key)
 
-            if value == '-1':
-                setattr(data, key, getattr(roomstate, key))
+                if value == '-1':
+                    setattr(data, key, getattr(roomstate, key))
 
         self.roomstate_repo.save(Roomstate(room_id=data.room_id,
-                                           follow_only=int(data.followers_only),
+                                           followers_only=int(data.followers_only),
                                            sub_only=int(data.sub_only),
                                            emote_only=int(data.emote_only),
                                            slow_mode=int(data.slow_mode),
                                            r9k=int(data.r9k)))
+
+    def _handleAnnouncement(self, data:AnnouncementTag) -> None:
+        """Handles ANNOUNCEMENT messages"""
+        
+        self._checkUserRoomUserInRoom(data)
+
+        if data.msg_id == 'sharedchatnotice':
+            self.announcement_repo.save(Announcement(room_id=data.source_room_id,
+                                                     user_id=data.user_id,
+                                                     display_name=data.display_name,
+                                                     msg_content=data.msg_content))
+            
+        else:
+            self.announcement_repo.save(Announcement(room_id=data.room_id,
+                                                     user_id=data.user_id,
+                                                     display_name=data.display_name,
+                                                     msg_content=data.msg_content))
+
+    def _handleViewerMilestone(self, data:ViewerMilestoneTag) -> None:
+        """Handles VIEWERMILESTONE messagers"""
+
+        self._checkUserRoomUserInRoom(data)
+
+        if data.msg_id == 'sharedchatnotice':
+            self.viewerMilestone_repo.save(ViewerMilestone(room_id=data.source_room_id,
+                                                           user_id=data.user_id,
+                                                           display_name=data.display_name,
+                                                           streak=data.param_value))
+            
+        else:
+            self.viewerMilestone_repo.save(ViewerMilestone(room_id=data.room_id,
+                                                           user_id=data.user_id,
+                                                           display_name=data.display_name,
+                                                           streak=data.param_value))
 
 
     def _handleJoin(self, data:dict) -> None:
@@ -252,8 +301,6 @@ class SaltyService:
 
             # check whether user exists in user_in_room table
             if not self.userInRoom_repo.exists(room_id=data.source_room_id, user_id=data.user_id):
-                
-                print(data.room_id, data.user_id)
 
                 self.userInRoom_repo.save(UserInRoom(room_id=data.source_room_id,
                                                      user_id=data.user_id,

@@ -11,13 +11,13 @@ class RoomStateRepository:
         """Get the state of a room by room_id from roomstate table"""
         
         query = '''
-                SELECT room_id, timestamp, follow_only, sub_only, emote_only, 
+                SELECT room_id, timestamp, followers_only, sub_only, emote_only, 
                        slow_mode, r9k
                 FROM roomstate
                 WHERE room_id = ?
                 '''
         
-        entry = self.db.execute_query(query, (room_id))
+        entry = self.db.execute_query(query, (room_id,))
 
         if entry:
             return Roomstate(room_id=entry[0],

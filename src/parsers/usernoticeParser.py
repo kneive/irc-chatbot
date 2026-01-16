@@ -1,6 +1,7 @@
 from .base import BaseParser, ParseResult
 from .tags.tagFactory import TagFactory
 from typing import Optional, Dict
+import traceback
 
 
 class UsernoticeParser(BaseParser):
@@ -13,6 +14,9 @@ class UsernoticeParser(BaseParser):
     def parse(self, input:str) -> Optional[ParseResult]:
         """Parse input and return ParseResult or None"""
 
+        tags = {}
+        usernotice = 'USERNOTICE'
+
         try:
             end = input.find(' :tmi.twitch.tv')
             if end == -1:
@@ -20,14 +24,21 @@ class UsernoticeParser(BaseParser):
 
             raw_tags = self._parseTags(input[1:end])
 
-            idx = input[end:].find(' #')
-            if idx == -1:
-                raise ValueError("(parse) USERNOTICE message is corrupted: no '#'")
+            idx_start = input.find(' #', end)
+            if idx_start == -1:
+                raise ValueError("(parse) USERNOTICE message is corrupted: no ' #'")
             
-            raw_tags['room-name'] = input[idx+1:].strip()
+            idx_end = input.find(' ', idx_start+1)
 
-            tags = {}
-            usernotice = 'USERNOTICE'
+            if raw_tags.get('msg-id') == 'sharedchatnotice':
+                raw_tags['room-name'] = '#unkown'
+            else:
+                if idx_end == -1:
+                    raw_tags['room-name'] = input[idx_start+1:].strip()
+                else:
+                    raw_tags['room-name'] = input[idx_start+1:idx_end].strip()
+                    message_start = input.find(' :', idx_end)
+                    raw_tags['message-content'] = input[message_start+2:].strip()
 
             if raw_tags.get('msg-id') == 'sharedchatnotice':
                 if raw_tags.get('source-msg-id') in ['sub', 'resub']:
@@ -42,6 +53,14 @@ class UsernoticeParser(BaseParser):
                     tags = TagFactory.createSubmysterygiftTag(raw_tags)
                     usernotice='SUBMYSTERYGIFT'
 
+                elif raw_tags.get('source-msg-id') == 'announcement':
+                    tags = TagFactory.createAnnouncementTag(raw_tags)
+                    usernotice='ANNOUNCEMENT'
+                
+                elif raw_tags.get('source-msg-id') == 'viewermilestone':
+                    tags = TagFactory.createViewerMilestoneTag(raw_tags)
+                    usernotice='VIEWERMILESTONE'
+
             else:
                 if raw_tags.get('msg-id') in ['sub', 'resub']:
                     tags = TagFactory.createSubTag(raw_tags)
@@ -55,8 +74,16 @@ class UsernoticeParser(BaseParser):
                     tags = TagFactory.createSubmysterygiftTag(raw_tags)
                     usernotice='SUBMYSTERYGIFT'
 
-            if tags == {} | usernotice == 'USERNOTICE':
-                raise ValueError(f'(parse) USERNOTICE message is corrupted:\n {tags}\n {usernotice}')
+                elif raw_tags.get('msg-id') == 'announcement':
+                    tags = TagFactory.createAnnouncementTag(raw_tags)
+                    usernotice='ANNOUNCEMENT'
+                
+                elif raw_tags.get('msg-id') == 'viewermilestone':
+                    tags = TagFactory.createViewerMilestoneTag(raw_tags)
+                    usernotice='VIEWERMILESTONE'
+
+            if tags == {} or usernotice == 'USERNOTICE':
+                raise ValueError(f'(parse) USERNOTICE message not parsed:\n {tags}\n {usernotice}')
 
             return ParseResult(usernotice,
                                tags,
@@ -65,7 +92,8 @@ class UsernoticeParser(BaseParser):
 
         except Exception as e:
             print(input)
-            print(f'(parse) USERNOTICE is corrupted: {e.with_traceback}, ({tags})')
+            print(f'(parse) USERNOTICE is corrupted: {e}, ({tags})')
+            print(f'Traceback: {traceback.format_exc()}')
             result = ParseResult('USERNOTICE', {}, input)
             result.is_valid = False
             result.error = str(e)
@@ -80,7 +108,7 @@ class UsernoticeParser(BaseParser):
                 if '=' in tag:
                     key, value = tag.split('=', 1)
                     tags[key] = value if value else None
-            
+
             return tags
 
         except ValueError as e:

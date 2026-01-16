@@ -1,6 +1,7 @@
 from .base import BaseParser, ParseResult
 from typing import Optional, Dict
 from .tags.tagFactory import TagFactory
+import traceback
 
 class MessageParser(BaseParser):
 
@@ -11,6 +12,8 @@ class MessageParser(BaseParser):
     
     def parse(self, input:str) -> Optional[ParseResult]:
         """Parse input and return ParseResult or None"""
+
+        tags = {}
 
         try:
             separator = self._buildSeparator(input)
@@ -52,7 +55,8 @@ class MessageParser(BaseParser):
 
         except Exception as e:
             print(input)
-            print(f'(parse) PRIVMSG message is corrupted: {e.with_traceback} ({tags})')
+            print(f'(parse) PRIVMSG message is corrupted: {e} ({tags})')
+            print(f'Traceback: {traceback.format_exc()}')
             result = ParseResult(message_type='PRIVMSG',
                                  data={},
                                  raw_message=input)
@@ -73,7 +77,12 @@ class MessageParser(BaseParser):
             if end == -1:
                 raise ValueError("(_buildSeparator) PRIVMSG message is corrupted: no ';' after display-name")
             
-            return f' :{input[start:end]}'.lower()
+            display_name = input[start:end]
+            idx = display_name.find('\s')
+            if idx == -1:
+                return f' :{display_name}'.lower()
+            else:
+                return f' :{display_name[:idx]}'.lower()
 
 
         except Exception as e:

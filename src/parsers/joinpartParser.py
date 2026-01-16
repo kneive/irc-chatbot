@@ -1,5 +1,6 @@
 from .base import BaseParser, ParseResult
 from typing import Optional, Dict
+import traceback
 
 class JoinPartParser(BaseParser):
 
@@ -30,7 +31,8 @@ class JoinPartParser(BaseParser):
         
         except Exception as e:
             print(input)
-            print(f'(parse) {type} message is corrupted: {e.with_traceback}, ({tags})' )
+            print(f'(parse) {type} message is corrupted: {e}, ({tags})' )
+            print(f'Traceback: {traceback.format_exc()}')
             result = ParseResult(type, {}, input)
             result.is_valid = False
             result.error = str(e)
