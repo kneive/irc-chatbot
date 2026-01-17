@@ -16,12 +16,13 @@ class RaidRepository:
         
         query = '''
                 INSERT INTO raid
-                (room_id, user_id, timestamp, source_room_id, viewer_count)
-                VALUES (?,?,CURRENT_TIMESTAMP,?,?)
+                (room_id, room_name, user_id, display_name, timestamp, viewer_count)
+                VALUES (?,?,?,?,CURRENT_TIMESTAMP,?)
                 '''
         self.db.execute_query(query, (raid.room_id,
+                                      raid.room_name,
                                       raid.user_id,
-                                      raid.source_room_id,
+                                      raid.display_name,
                                       raid.viewer_count))
 
     def exists(self, user_id:str, room_id:str) -> bool:

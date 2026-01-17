@@ -1,7 +1,10 @@
-import socket
-import ssl
+
+import json
+import time
 import threading
 import traceback
+import socket
+import ssl
 from auth import get_token
 from pathlib import Path
 from parsers.parser import Saltshaker
@@ -22,17 +25,15 @@ from db.services.service import SaltyService
 from db.database import DatabaseManager
 
 PROJECT_ROOT = Path(__file__).parent.parent
-KEYS = PROJECT_ROOT / 'keyz'
-LOGINDATA = KEYS / 'logins.key'
-
+LOGINDATA = PROJECT_ROOT / 'keyz' / 'logins.key'
+CONFIG = PROJECT_ROOT / 'config' / 'config.json'
 LOGFILE = PROJECT_ROOT / 'logs' / 'log.log'
 
 TOKEN = get_token()
-NICKNAME = 'nickname'
 
-CHANNELLIST = ['roomname',]
 
 class IRCClient:
+
     def __init__(self, nick, token, server='irc.chat.twitch.tv', port=6697, 
                  use_ssl=True, log_file=None):
         self.server = server
@@ -98,27 +99,33 @@ class IRCClient:
 
     def send_raw(self, message):
         """Send a raw message to an IRC server."""
+
         if self.socket:
             self.socket.sendall(f'{message}\r\n'.encode('utf-8'))
 
     def login(self):
         """Send auth token and username to twitch server"""
+
         self.send_raw(f'PASS {self.token}')
         self.send_raw(f'NICK {self.nick}')
-        #self.send_raw(f'USER {self.nick} 0 * :{self.nick}') ignored by twitch
 
     def request_capabilities(self, tags=True, commands=True, membership=True):
         """Request capabilities from Twitch IRC server"""
+
         caps = []
         if tags: caps.append('twitch.tv/tags')
+        
         if commands: caps.append('twitch.tv/commands')
+        
         if membership: caps.append('twitch.tv/membership')
+        
         if caps:
             self.send_raw(f'CAP REQ :' + ' '.join(caps))
             print('Requested capabilities:', caps)
 
     def join_channel(self, channel):
         """Join an IRC channel."""
+
         if not channel.startswith('#'):
             channel = '#' + channel
         self.send_raw(f'JOIN {channel}')
@@ -126,12 +133,14 @@ class IRCClient:
 
     def send_message(self, channel, message):
         """Send a message to a channel."""
+
         if not channel.startswith('#'):
             channel = '#' + channel
         self.send_raw(f'PRIVMSG {channel} :{message}')
 
     def receive(self):
         """Receive data from a server."""
+
         buffer =''
         while self.running:
             try:
@@ -139,6 +148,7 @@ class IRCClient:
                 if not data:
                     print('Disconnected by server')
                     break
+                
                 buffer += data.decode('utf-8', errors='ignore')
                 while '\r\n' in buffer:
                     line, buffer = buffer.split('\r\n', 1)
@@ -150,9 +160,12 @@ class IRCClient:
 
     def receive_banner(self, timeout=2.0):
         """Read the server banner"""
+        
         if not self.socket:
             return None
+        
         prev_timeout = None
+        
         try:
             prev_timeout = self.socket.gettimeout()
             self.socket.settimeout(timeout)
@@ -160,11 +173,13 @@ class IRCClient:
             if not data:
                 return None
             return data.decode('utf-8', errors='ignore')
+        
         except socket.timeout:
             return None
         except Exception as e:
             print(f'receive error: {e}')
             return None
+        
         finally:
             try:
                 self.socket.settimeout(prev_timeout)
@@ -209,21 +224,33 @@ class IRCClient:
 
             if not command:
                 continue
+
             # quit server
             if command.lower() == 'quit':
                 self.running = False
                 break
+
             # join channel
             elif command.lower().startswith('join '):
                 channel = command[5:].strip()
                 self.join_channel(channel)
 
             elif command.lower().startswith('say '):
-                if not default_channel:
-                    print('Set a default_channel or use: PRIVMSG #chan :message')
-                    continue
-                message = command[4:].strip()
-                self.send_message(default_channel, message)
+                rest = command[4:].strip()
+
+                if rest.startswith('#'):
+                    parts = rest.split(' ', 1)
+                    if len(parts) == 2:
+                        channel = parts[0]
+                        message = parts[1]
+                        self.send_message(channel, message)
+                    else:
+                        print("Uasge: 'say #channel message'")
+                else:
+                    if not default_channel:
+                        print('Set a default_channel or use: PRIVMSG #chan :message')
+                        continue
+                    self.send_message(default_channel, rest)
             else:
                 # send raw message
                 self.send_raw(command)
@@ -232,19 +259,46 @@ class IRCClient:
 
     def disconnect(self):
         """Close a connection"""
+
         self.running = False
         try:
             if self.socket:
                 self.socket.close()
+
         finally:
             if self.log_handle:
                 self.log_handle.close()
                 self.log_handle = None
             print('Disconnected')
 
-#example
+def read_config():
+        """Read configuration from config.json"""
+
+        try:
+            with open(CONFIG, 'r') as fd:
+                config = json.load(fd)
+
+            nickname = config.get('nickname')
+            if not nickname:
+                raise ValueError("Missing 'nickname' in config.json")
+            
+            channels = config.get('channels', [])
+
+            return nickname, channels
+        
+        except FileNotFoundError:
+            print (f'Error: {CONFIG} not found.')
+            raise
+        except json.JSONDecodeError as e:
+            print(f'Error parsing config.json: {e}')
+            raise
+        except Exception as e:
+            print(f'Error reading config: {e}')
+            raise
 
 if __name__ == '__main__':
+
+    NICKNAME, CHANNELLIST = read_config()
 
     if not NICKNAME or not TOKEN:
         print('Missing NICKNAME or AUTH TOKEN')
@@ -259,7 +313,14 @@ if __name__ == '__main__':
         client.request_capabilities(tags=True, commands=True, membership=True)        
         
         #receive banner
-        print(client.receive())
+        print(client.receive_banner())
+
+        if CHANNELLIST:
+            for channel in CHANNELLIST:
+                client.join_channel(channel)
+                time.sleep(0.5)
+        
+        print("Use 'join #channel' to join channels.")
 
         #receive in different thread
         client.running = True
@@ -269,9 +330,10 @@ if __name__ == '__main__':
         print("Type 'say <message>' to chat, 'join #channel' to join another channel, or 'quit' to leave the server.")
 
         try:
-            client.input(f'#{CHANNELLIST[0]}')
+            client.input(default_channel=None)
 
         except KeyboardInterrupt:
             print('\nClosing connection...')
         finally:
             client.disconnect()
+

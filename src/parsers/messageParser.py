@@ -16,12 +16,14 @@ class MessageParser(BaseParser):
         tags = {}
 
         try:
-            separator = self._buildSeparator(input)
-            
             # find end of tags
-            boundary = input.find(separator)
+            temp_idx = input.find('user-type=')
+            if temp_idx == -1:
+                raise ValueError(f"(parse) PRIVMSG message is corrupted: no 'user-type'.")
+
+            boundary = input.find(' :', temp_idx)
             if boundary == -1:
-                raise ValueError(f"(parse) PRIVMSG message is corrupted: cannot separate tags from message part. ({separator}, {boundary})")
+                raise ValueError(f"(parse) PRIVMSG message is corrupted: cannot separate tags from message part. No ' :' after 'user-type'")
 
             raw_tags = self._parseTags(input[1:boundary])
 
@@ -64,6 +66,7 @@ class MessageParser(BaseParser):
             result.error = str(e)
             return result
 
+    # deprecated
     def _buildSeparator(self, input:str) -> str:
         """Build separator for tags and message part"""
 

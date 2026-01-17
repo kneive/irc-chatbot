@@ -12,7 +12,8 @@ from ..repositories import (AnnouncementRepository,
                             UserlistRepository,
                             ViewerMilestoneRepository)
 from ..models import (Announcement,
-                      User, 
+                      User,
+                      Raid, 
                       Room,
                       Roomstate, 
                       UserInRoom, 
@@ -24,7 +25,8 @@ from ..models import (Announcement,
 
 from parsers.tags import (AnnouncementTag, 
                           BaseTag, 
-                          PrivmsgTag, 
+                          PrivmsgTag,
+                          RaidTag, 
                           RoomstateTag, 
                           SubgiftTag, 
                           SubmysterygiftTag,
@@ -80,8 +82,6 @@ class SaltyService:
             self._handleSubgift(parsed.data)
         elif parsed.message_type == 'SUBMYSTERYGIFT':
             self._handleSubmysterygift(parsed.data)
-        elif parsed.message_type == 'ROOMSTATE':
-            self._handleRoomstate(parsed.data)
         elif parsed.message_type == 'ANNOUNCEMENT':
             self._handleAnnouncement(parsed.data)
         elif parsed.message_type == 'VIEWERMILESTONE':
@@ -90,6 +90,10 @@ class SaltyService:
             self._handleJoin(parsed.data)
         elif parsed.message_type == 'PART':
             self._handlePart(parsed.data)
+        elif parsed.message_type == 'ROOMSTATE':
+            self._handleRoomstate(parsed.data)
+        elif parsed.message_type == 'RAID':
+            self._handleRaid(parsed.data)
 
     def _handlePrivMessage(self, data:PrivmsgTag) -> None:
         """Handles PRIVMSG messages"""
@@ -186,7 +190,7 @@ class SaltyService:
                                            sub_plan=data.sub_plan))
 
     def _handleSubmysterygift(self, data:SubmysterygiftTag) -> None:
-        """Handles SAUBMYSTERYGIFT messages"""
+        """Handles SUBMYSTERYGIFT messages"""
 
         self._checkUserRoomUserInRoom(data)
 
@@ -227,6 +231,25 @@ class SaltyService:
                                            emote_only=int(data.emote_only),
                                            slow_mode=int(data.slow_mode),
                                            r9k=int(data.r9k)))
+
+    def _handleRaid(self, data:RaidTag) -> None:
+        """Handles RAID messages"""
+
+        self._checkUserRoomUserInRoom(data)
+
+        if data.msg_id == 'sharedchatnotice':
+            self.raid_repo.save(Raid(room_id=data.source_room_id,
+                                     room_name=data.room_name,
+                                     user_id=data.user_id,
+                                     display_name=data.display_name,
+                                     viewer_count=int(data.msg_param_viewerCount)))
+        else:
+            self.raid_repo.save(Raid(room_id=data.room_id,
+                                     room_name=data.room_name,
+                                     user_id=data.user_id,
+                                     display_name=data.display_name,
+                                     viewer_count=int(data.msg_param_viewerCount)))
+
 
     def _handleAnnouncement(self, data:AnnouncementTag) -> None:
         """Handles ANNOUNCEMENT messages"""

@@ -31,8 +31,9 @@ class MessageInRoom:
 @dataclass
 class Raid:
     room_id:str | None = None
+    room_name:str=''
     user_id:str | None = None
-    source_room_id:str=''
+    display_name:str=''
     viewer_count:int=1
 
 @dataclass

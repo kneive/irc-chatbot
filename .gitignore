@@ -7,6 +7,9 @@ __pycache__/
 # old code
 old/
 
+# config files
+config/
+
 # Files
 *.db
 *.key

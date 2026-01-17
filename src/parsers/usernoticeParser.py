@@ -30,8 +30,9 @@ class UsernoticeParser(BaseParser):
             
             idx_end = input.find(' ', idx_start+1)
 
-            if raw_tags.get('msg-id') == 'sharedchatnotice':
-                raw_tags['room-name'] = '#unkown'
+            if (raw_tags.get('msg-id') == 'sharedchatnotice' and
+                raw_tags.get('room-id') != raw_tags.get('source-room-id')):
+                raw_tags['room-name'] = '#unknown'
             else:
                 if idx_end == -1:
                     raw_tags['room-name'] = input[idx_start+1:].strip()
@@ -39,6 +40,8 @@ class UsernoticeParser(BaseParser):
                     raw_tags['room-name'] = input[idx_start+1:idx_end].strip()
                     message_start = input.find(' :', idx_end)
                     raw_tags['message-content'] = input[message_start+2:].strip()
+
+            print(f'{raw_tags['msg-id']}: {raw_tags['room-name']}')
 
             if raw_tags.get('msg-id') == 'sharedchatnotice':
                 if raw_tags.get('source-msg-id') in ['sub', 'resub']:
@@ -60,6 +63,9 @@ class UsernoticeParser(BaseParser):
                 elif raw_tags.get('source-msg-id') == 'viewermilestone':
                     tags = TagFactory.createViewerMilestoneTag(raw_tags)
                     usernotice='VIEWERMILESTONE'
+                elif raw_tags.get('source-msg-id') == 'raid':
+                    tags = TagFactory.createRaidTag(raw_tags)
+                    usernotice='RAID'
 
             else:
                 if raw_tags.get('msg-id') in ['sub', 'resub']:
@@ -81,6 +87,9 @@ class UsernoticeParser(BaseParser):
                 elif raw_tags.get('msg-id') == 'viewermilestone':
                     tags = TagFactory.createViewerMilestoneTag(raw_tags)
                     usernotice='VIEWERMILESTONE'
+                elif raw_tags.get('msg-id') == 'raid':
+                    tags = TagFactory.createRaidTag(raw_tags)
+                    usernotice='RAID'
 
             if tags == {} or usernotice == 'USERNOTICE':
                 raise ValueError(f'(parse) USERNOTICE message not parsed:\n {tags}\n {usernotice}')

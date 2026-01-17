@@ -52,9 +52,10 @@ class DatabaseManager:
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS raid (
                     room_id TEXT,
+                    room_name TEXT,
                     user_id TEXT,
+                    display_name TEXT,
                     timestamp TIMESTAMP,
-                    source_room_id TEXT,
                     viewer_count INTEGER DEFAULT 0,
                     FOREIGN KEY (room_id) REFERENCES room (room_id),
                     FOREIGN KEY (user_id) REFERENCES user (user_id)

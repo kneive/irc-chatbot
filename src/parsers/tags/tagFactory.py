@@ -1,5 +1,6 @@
 from .announcementTag import AnnouncementTag
 from .privmsgTag import PrivmsgTag
+from .raidTag import RaidTag
 from .roomstateTag import RoomstateTag
 from .subgiftTag import SubgiftTag
 from .submysteryTag import SubmysterygiftTag
@@ -75,6 +76,37 @@ class TagFactory:
                           reply_thread_parent_display_name=raw_tags.get('reply-thread-parent-display-name', 'null'),
                           reply_thread_parent_msg_id=raw_tags.get('reply-thread-parent-msg-id', 'null'))
     
+    @staticmethod
+    def createRaidTag(raw_tags:dict) -> RaidTag:
+        """Create tags for RAID messages"""
+        
+        return RaidTag(user_id=raw_tags.get('user-id'),
+                       display_name=raw_tags.get('display-name'),
+                       username=raw_tags.get('display-name').lower(),
+                       badge_info=raw_tags.get('badge-info'),
+                       badges=raw_tags.get('badges'),
+                       source_badge_info=raw_tags.get('source-badge-info', 'null'),
+                       source_badges=raw_tags.get('source-badges', 'null'),
+                       color=raw_tags.get('color'),
+                       emotes=raw_tags.get('emotes'),
+                       flags=raw_tags.get('flags'),
+                       user_type=raw_tags.get('user-type'),
+                       room_id=raw_tags.get('room-id'),
+                       source_room_id=raw_tags.get('source-room-id', 'null'),
+                       room_name=raw_tags.get('room-name', '#unknown'),
+                       id=raw_tags.get('id'),
+                       tmi_sent_ts=raw_tags.get('tmi-sent-ts'),
+                       sub=raw_tags.get('subscriber', '-1'),
+                       vip=raw_tags.get('vip', '-1'),
+                       mod=raw_tags.get('mod', '-1'),
+                       msg_param_displayName=raw_tags.get('msg-param-displayName', 'null'),
+                       msg_param_lopgin=raw_tags.get('msg-param-login', 'null'),
+                       msg_param_profileImageURL=raw_tags.get('msg-param-profileImageURL', 'null'),
+                       msg_param_viewerCount=raw_tags.get('msg-param-viewerCount', '-1'),
+                       msg_id=raw_tags.get('msg-id'),
+                       source_msg_id=raw_tags.get('source-msg-id', 'null'),
+                       msg_content=raw_tags.get('message-content', 'null'))
+
     @staticmethod
     def createRoomstateTag(raw_tags:dict) -> RoomstateTag:
         """Create tags for ROOMSTATE messages"""
