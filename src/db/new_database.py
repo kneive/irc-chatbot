@@ -72,8 +72,139 @@ class DatabaseManager:
                 )
             ''')
 
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS sub(
+                    user_id TEXT FOREIGN KEY REFERENCES user (user_id),
+                    room_id TEXT FOREIGN KEY REFERENCES room (room_id),
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    tmi_sent_ts TEXT NOT NULL,
+                    msg_id TEXT NOT NULL,
+                    source_msg_id TEXT,
+                    cumulative_months INTEGER DEFAULT 0,
+                    months INTEGER DEFAULT 0,
+                    multimonth_duration INTEGER DEFAULT 0,
+                    multimonth_tenure INTEGER DEFAULT 0,
+                    should_share_streak INTEGER DEFAULT 0,
+                    sub_plan_name TEXT,
+                    sub_plan TEXT NOT NULL,
+                    was_gifted TEXT NOT NULL,
+                    system_msg TEXT,
+                )            
+            ''')
 
-        #TODO Raids, Subs, submystery, raids, announcements, bits
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS subgift(
+                    user_id TEXT FOREIGN KEY REFERENCES user (user_id),
+                    room_id TEXT FOREIGN KEY REFERENCES room (room_id),
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    tmi_sent_ts TEXT NOT NULL,
+                    msg_id TEXT NOT NULL,
+                    source_msg_id TEXT,
+                    community_gift_id TEXT NOT NULL,
+                    fun_string TEXT,
+                    gift_months INTEGER DEFAULT 0,
+                    months INTEGER DEFAULT 0,
+                    origin_id TEXT,
+                    recipient_id TEXT,
+                    recipient_display_name TEXT,
+                    recipient_user_name TEXT,
+                    sender_count INTEGER DEFAULT 0,
+                    sub_plan_name TEXT,
+                    sub_plan TEXT,
+                    system_msg TEXT,
+                )
+            ''')
+
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS submysterygift (
+                    user_id TEXT FOREIGN KEY REFERENCES user (user_id),
+                    room_id TEXT FOREIGN KEY REFERENCES room (room_id),
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    tmi_sent_ts TEXT NOT NULL,
+                    msg_id TEXT NOT NULL,
+                    source_msg_id TEXT,
+                    community_gift_id TEXT NOT NULL,
+                    contribution_type TEXT,
+                    current_contributions INTEGER DEFAULT 0,
+                    target_contributions INTEGER DEFAULT 0,
+                    user_contributions INTEGER DEFAULT 0,
+                    mass_gift_count INTEGER DEFAULT 0,
+                    origin_id TEXT,
+                    sub_plan TEXT,
+                    system_msg TEXT NOT NULL
+                )
+            ''')
+
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS payforward (
+                    user_id TEXT FOREIGN KEY REFERENCES user (user_id),
+                    room_id TEXT FOREIGN KEY REFERENCES room (room_id,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    tmi_sent_ts TEXT NOT NULL,
+                    msg_id TEXT NOT NULL,
+                    source_msg_id TEXT,
+                    prior_gifter_anonymous TEXT,
+                    prior_gifter_id TEXT FOREIGN KEY REFERENCES user (user_id),
+                    prior_gifter_display_name TEXT,
+                    prior_gifter_user_name TEXT,
+                    recipient_id TEXT,
+                    recipient_display_name TEXT,
+                    recipient_user_name TEXT,
+                    system_msg TEXT NOT NULL
+                )
+            ''')
+
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS paidupgrade (
+                    user_id TEXT FOREIGN KEY REFERENCES user (user_id),
+                    room_id TEXT FOREIGN KEY REFERENCES room (room_id),
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    tmi_sent_ts TEXT NOT NULL,
+                    msg_id TEXT NOT NULL,
+                    source_msg_id TEXT,
+                    sender_login TEXT,
+                    sender_name TEXT,
+                    sub_plan TEXT,
+                    system_msg TEXT NOT NULL
+                )
+            ''')
+
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS onetapgift (
+                    user_id TEXT FOREIGN KEY REFERENCES user (user_id),
+                    room_id TEXT FOREIGN KEY REFERENCES room (room_id),
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    tmi_sent_ts TEXT NOT NULL,
+                    msg_id TEXT NOT NULL,
+                    source_msg_id TEXT,
+                    bits_spent INTEGER DEFAULT 0,
+                    gift_id TEXT NOT NULL,
+                    user_display_name TEXT,
+                    system_msg TEXT NOT NULL
+                )
+            ''')
+
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS roomstate (
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    room_id TEXT FOREIGN KEY REFERENCES room (room_id),
+                    emote_only INTEGER DEFAULT 0,
+                    followers_only INTEGER DEFAULT 0,
+                    r9k INTEGER DEFAULT 0,
+                    slow INTEGER DEFAULT 0,
+                    subs_only INTEGER DEFAULT 0
+                )
+            ''')
+
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS userlist (
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    room_name TEXT NOT NULL,
+                    room_id TEXT,
+                    username TEXT NOT NULL,
+                    join_part TEXT NOT NULL
+                )
+            ''')
 
 
     def execute_query(self, query:str, params:tuple=()) -> Optional[tuple]:
