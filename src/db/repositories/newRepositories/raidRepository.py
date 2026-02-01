@@ -1,6 +1,6 @@
+from typing import List, Optional
 from ..database import DatabaseManager
 from ..models import Raid
-from typing import List, Optional
 
 class RaidRepository:
 

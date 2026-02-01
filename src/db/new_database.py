@@ -79,6 +79,7 @@ class DatabaseManager:
 
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS sub(
+                    serial INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id TEXT FOREIGN KEY REFERENCES user (user_id),
                     room_id TEXT FOREIGN KEY REFERENCES room (room_id),
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -99,6 +100,7 @@ class DatabaseManager:
 
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS subgift(
+                    serial INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id TEXT FOREIGN KEY REFERENCES user (user_id),
                     room_id TEXT FOREIGN KEY REFERENCES room (room_id),
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -122,6 +124,7 @@ class DatabaseManager:
 
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS submysterygift (
+                    serial INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id TEXT FOREIGN KEY REFERENCES user (user_id),
                     room_id TEXT FOREIGN KEY REFERENCES room (room_id),
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -142,6 +145,7 @@ class DatabaseManager:
 
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS payforward (
+                    serial INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id TEXT FOREIGN KEY REFERENCES user (user_id),
                     room_id TEXT FOREIGN KEY REFERENCES room (room_id,
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -161,6 +165,7 @@ class DatabaseManager:
 
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS paidupgrade (
+                    serial INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id TEXT FOREIGN KEY REFERENCES user (user_id),
                     room_id TEXT FOREIGN KEY REFERENCES room (room_id),
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -176,6 +181,7 @@ class DatabaseManager:
 
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS onetapgift (
+                    serial INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id TEXT FOREIGN KEY REFERENCES user (user_id),
                     room_id TEXT FOREIGN KEY REFERENCES room (room_id),
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -192,7 +198,7 @@ class DatabaseManager:
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS roomstate (
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    room_id TEXT FOREIGN KEY REFERENCES room (room_id),
+                    room_id TEXT PRIMARY KEY,
                     emote_only INTEGER DEFAULT 0,
                     followers_only INTEGER DEFAULT 0,
                     r9k INTEGER DEFAULT 0,
@@ -203,6 +209,7 @@ class DatabaseManager:
 
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS userlist (
+                    serial INTEGER PRIMARY KEY AUTOINCREMENT,
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     room_name TEXT NOT NULL,
                     room_id TEXT,
