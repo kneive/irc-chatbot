@@ -16,14 +16,17 @@ class DatabaseManager:
                     login TEXT DEFAULT '',
                     display_name TEXT DEFAULT '',
                     user_type TEXT DEFAULT '',
-                    turbo INTEGER DEFAULT 0
+                    turbo INTEGER DEFAULT 0,
+                    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             ''')
 
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS room (
                     room_id TEXT PRIMARY KEY,
-                    room_name TEXT DEFAULT '#UNKNOWN')
+                    room_name TEXT DEFAULT '#UNKNOWN',
+                    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
             ''')
 
             conn.execute('''
@@ -41,10 +44,11 @@ class DatabaseManager:
 
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS privmsg (
+                    serial INTEGER PRIMARY KEY AUTOINCREMENT,
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
                     tmi_sent_ts TEXT NOT NULL,
-                    id TEXT PRIMARY KEY,
-                    source_id TEXT,
+                    message_id TEXT PRIMARY KEY,
+                    source_message_id TEXT,
                     room_id TEXT FOREIGN KEY REFERENCES room (room_id),
                     source_room_id TEXT DEFAULT 'NULL',
                     user_id TEXT FOREIGN KEY REFERENCES user (user_id),
@@ -59,8 +63,9 @@ class DatabaseManager:
 
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS raid (
+                    serial INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id TEXT FOREIGN KEY REFERENCES user (user_id),
-                    rooom_id TEXT FOREIGN KEY REFERENCES room (room_id),
+                    room_id TEXT FOREIGN KEY REFERENCES room (room_id),
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     tmi_sent_ts TEXT NOT NULL,
                     msg_id TEXT NOT NULL,
