@@ -3,14 +3,6 @@ from .tags.tagFactory import TagFactory
 from typing import Optional, Dict
 import traceback
 
-from pathlib import Path
-import logging
-
-logging.basicConfig(
-    filename=Path(__file__).parent.parent/ 'logs' / 'usernotice.log', 
-    level=logging.ERROR,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
 
 class UsernoticeParser(BaseParser):
 
@@ -74,6 +66,25 @@ class UsernoticeParser(BaseParser):
                 elif raw_tags.get('source-msg-id') == 'raid':
                     tags = TagFactory.createRaidTag(raw_tags)
                     usernotice='RAID'
+                # NEW
+                elif raw_tags.get('source-msg-id') == 'standardpayforward':
+                    tags = TagFactory.createStandardPayForwardTag(raw_tags)
+                    usernotice='STANDARDPAYFORWARD'
+                elif raw_tags.get('source-msg-id') == 'communitypayforward':
+                    tags = TagFactory.createCommunityPayForwardTag(raw_tags)
+                    usernotice='COMMUNITYPAYFORWARD'
+                elif raw_tags.get('source-msg-id') == 'primepaidupgrade':
+                    tags = TagFactory.createPrimePaidUpgradeTag(raw_tags)
+                    usernotice='PRIMEPAIDUPGRADE'
+                elif raw_tags.get('source-msg-id') == 'giftpaidupgrade':
+                    tags = TagFactory.createGiftPaidUpgradeTag(raw_tags)
+                    usernotice='GIFTPAIDUPGRADE'
+                elif raw_tags.get('source-msg-id') == 'onetapgiftredeemed':
+                    tags = TagFactory.createOneTapGiftRedeemedTag(raw_tags)
+                    usernotice='ONETAPGIFTREDEEMED'
+                elif raw_tags.get('source-msg-id') == 'bitsbadgetier': 
+                    tags = TagFactory.createBitsBadgeTierTag(raw_tags)
+                    usernotice='BITSBADGETIER'
 
             else:
                 if raw_tags.get('msg-id') in ['sub', 'resub']:
@@ -98,6 +109,25 @@ class UsernoticeParser(BaseParser):
                 elif raw_tags.get('msg-id') == 'raid':
                     tags = TagFactory.createRaidTag(raw_tags)
                     usernotice='RAID'
+                # NEW
+                elif raw_tags.get('msg-id') == 'standardpayforward':
+                    tags = TagFactory.createStandardPayForwardTag(raw_tags)
+                    usernotice='STANDARDPAYFORWARD'
+                elif raw_tags.get('msg-id') == 'communitypayforward':
+                    tags = TagFactory.createCommunityPayForwardTag(raw_tags)
+                    usernotice='COMMUNITYPAYFORWARD'
+                elif raw_tags.get('msg-id') == 'primepaidupgrade':
+                    tags = TagFactory.createPrimePaidUpgradeTag(raw_tags)
+                    usernotice='PRIMEPAIDUPGRADE'
+                elif raw_tags.get('msg-id') == 'giftpaidupgrade':
+                    tags = TagFactory.createGiftPaidUpgradeTag(raw_tags)
+                    usernotice='GIFTPAIDUPGRADE'
+                elif raw_tags.get('msg-id') == 'onetapgiftredeemed':
+                    tags = TagFactory.createOneTapGiftRedeemedTag(raw_tags)
+                    usernotice='ONETAPGIFTREDEEMED'
+                elif raw_tags.get('msg-id') == 'bitsbadgetier': 
+                    tags = TagFactory.createBitsBadgeTierTag(raw_tags)
+                    usernotice='BITSBADGETIER'
 
             if tags == {} or usernotice == 'USERNOTICE':
                 raise ValueError(f'(parse) USERNOTICE message not parsed:\n {tags}\n {usernotice}')
@@ -108,7 +138,9 @@ class UsernoticeParser(BaseParser):
 
 
         except Exception as e:
-            logging.exception(f"UNHANDLED USERNOTICE: {input} \n\nTAGS: {tags} \n\nERRORMSG: {e} \n\nTRACE: {traceback.format_exc()}")
+            print(input)
+            print(f'(parse) USERNOTICE is corrupted: {e}, ({tags})')
+            print(f'Traceback: {traceback.format_exc()}')
             result = ParseResult('USERNOTICE', {}, input)
             result.is_valid = False
             result.error = str(e)
