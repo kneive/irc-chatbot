@@ -9,6 +9,17 @@ class DatabaseManager:
     def setup_database(self):
         """Create all tables"""
         with sqlite3.connect(self.db_path) as conn:
+
+            # maybe redesign?
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS announcement (
+                    room_id TEXT,
+                    user_id TEXT,
+                    display_name TEXT,
+                    timestamp TIMESTAMP,
+                    msg_content TEXT
+                )             
+            ''')
             
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS user (
@@ -69,6 +80,7 @@ class DatabaseManager:
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     tmi_sent_ts TEXT NOT NULL,
                     msg_id TEXT NOT NULL,
+                    source_msg_id TEXT,
                     msg_param_displayName TEXT,
                     msg_param_login TEXT,
                     msg_param_profileImageURL TEXT,
@@ -215,6 +227,17 @@ class DatabaseManager:
                     room_id TEXT,
                     username TEXT NOT NULL,
                     join_part TEXT NOT NULL
+                )
+            ''')
+
+            # maybe redesign?
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS viewermilestone(
+                    room_id TEXT,
+                    user_id TEXT,
+                    display_name TEXT,
+                    timestamp TIMESTAMP,
+                    streak INTEGER DEFAULT 0
                 )
             ''')
 

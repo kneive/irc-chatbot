@@ -29,7 +29,7 @@ class PayforwardRepository:
                                       payforward.source_msg_id,
                                       payforward.prior_gifter_anonymous,
                                       payforward.prior_gifter_id,
-                                      payforward.prior_gifter_display__name,
+                                      payforward.prior_gifter_display_name,
                                       payforward.prior_gifter_user_name,
                                       payforward.recipient_id,
                                       payforward.recipient_display_name,

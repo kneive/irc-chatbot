@@ -23,6 +23,7 @@ class BaseTag:
     flags:str
     user_type:str
     subscriber:int
+    sub_streak:int=-1
     vip:int
     mod:int
     

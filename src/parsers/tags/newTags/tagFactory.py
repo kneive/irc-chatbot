@@ -215,6 +215,8 @@ class TagFactory:
                           msg_id=raw_tags.get('msg-id'),
                           source_msg_id=raw_tags.get('source-msg-id', None),
                           tmi_sent_ts=int(raw_tags.get('tmi-sent-ts')),
+                          message_id=raw_tags.get('id'),
+                          source_message_id=raw_tags.get('source-id', None),
                           first_msg=int(raw_tags.get('first-msg', '0')),
                           returning_chatter=int(raw_tags.get('returning-chatter', '0')),
                           turbo=int(raw_tags.get('turbo', '0')),

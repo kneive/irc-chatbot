@@ -16,15 +16,16 @@ class RaidRepository:
         
         query = '''
                 INSERT INTO raid
-                (user_id, room_id, timestamp, tmi_sent_ts, msg_id, 
+                (user_id, room_id, timestamp, tmi_sent_ts, msg_id, source_msg_id, 
                 msg_param_displayName, msg_param_login, msg_param_profileImageURL,
                  msg_param_viewerCount, system_msg)
-                VALUES (?,?,CURRENT_TIMESTAMP,?,?,?,?,?,?,?)
+                VALUES (?,?,CURRENT_TIMESTAMP,?,?,?,?,?,?,?,?)
                 '''
         self.db.execute_query(query, (raid.user_id,
                                       raid.room_id,
                                       raid.tmi_sent_ts,
                                       raid.msg_id,
+                                      raid.source_msg_id,
                                       raid.msg_param_displayName,
                                       raid.msg_param_login,
                                       raid.msg_param_profileImageURL,
