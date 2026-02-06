@@ -18,14 +18,15 @@ class ViewerMilestoneRepository(Saltmine[ViewerMilestone]):
 
         query = '''
                 INSERT INTO viewermilestone
-                (room_id, user_id, display_name, timestamp, streak)
-                VALUES (?,?,?,CURRENT_TIMESTAMP,?)
+                (room_id, user_id, display_name, timestamp, streak, system_msg)
+                VALUES (?,?,?,CURRENT_TIMESTAMP,?,?)
                 '''
         
         self.db.execute_query(query, (milestone.room_id,
                                       milestone.user_id,
                                       milestone.display_name,
-                                      milestone.streak))
+                                      milestone.streak,
+                                      milestone.system_msg))
 
     def exists(self, room_id:str, user_id:str) -> bool:
         """Check whether a viewer milestone was ever shared by user_id in room_id"""

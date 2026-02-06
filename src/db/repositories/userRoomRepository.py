@@ -16,14 +16,14 @@ class UserRoomRepository:
         query = '''
                 INSERT OR REPLACE INTO user_in_room
                 (timestamp, user_id, room_id, badges, 
-                badge_info, sub, sub_streak, vip, mod)
+                badge_info, subscriber, sub_streak, vip, mod)
                 VALUES (CURRENT_TIMESTAMP,?,?,?,?,?,?,?,?)
                 '''
         self.db.execute_query(query, (user_in_room.user_id,
                                       user_in_room.room_id,
                                       user_in_room.badges,
                                       user_in_room.badge_info,
-                                      user_in_room.sub,
+                                      user_in_room.subscriber,
                                       user_in_room.sub_streak,
                                       user_in_room.vip,
                                       user_in_room.mod))

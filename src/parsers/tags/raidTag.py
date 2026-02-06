@@ -5,10 +5,10 @@ from .baseTag import BaseTag
 class RaidTag(BaseTag):
 
     # raid (not in unraid)
-    msg_param_display_name:str
-    msg_param_login:str
-    msg_param_profileImageURL:str
+    msg_param_display_name:str | None = None
+    msg_param_login:str | None = None
+    msg_param_profileImageURL:str | None = None
     msg_param_viewerCount:int=-42
 
     # general
-    system_msg:str
+    system_msg:str | None = None

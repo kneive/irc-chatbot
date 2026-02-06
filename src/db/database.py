@@ -13,18 +13,20 @@ class DatabaseManager:
             # maybe redesign?
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS announcement (
-                    room_id TEXT,
-                    user_id TEXT,
+                    serial INTEGER PRIMARY KEY AUTOINCREMENT,
+                    room_id TEXT REFERENCES room (room_id),
+                    user_id TEXT REFERENCES user (user_id),
                     display_name TEXT,
-                    timestamp TIMESTAMP,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     msg_content TEXT
                 )             
             ''')
 
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS bitsbadgetier (
-                    room_id TEXT FOREIGN KEY REFERENCES room (room_id),
-                    user_id TEXT FOREIGN KEY REFERENCES user (user_id),
+                    serial INTEGER PRIMARY KEY AUTOINCREMENT,
+                    room_id TEXT REFERENCES room (room_id),
+                    user_id TEXT REFERENCES user (user_id),
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     msg_param_threshold INTEGER DEFAULT 0,
                     system_msg TEXT
@@ -51,10 +53,10 @@ class DatabaseManager:
             ''')
 
             conn.execute('''
-                CREATE TABLE IF NOT EXISTS user_room (
+                CREATE TABLE IF NOT EXISTS user_in_room (
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP PRIMARY KEY,
-                    user_id TEXT FOREIGN KEY REFERENCES user (user_id),
-                    room_id TEXT FOREIGN KEY REFERENCES room (room_id),
+                    user_id TEXT REFERENCES user (user_id),
+                    room_id TEXT REFERENCES room (room_id),
                     badges TEXT DEFAULT '',
                     badge_info TEXT DEFAULT '',
                     subscriber INTEGER DEFAULT 0,
@@ -68,25 +70,25 @@ class DatabaseManager:
                     serial INTEGER PRIMARY KEY AUTOINCREMENT,
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
                     tmi_sent_ts TEXT NOT NULL,
-                    message_id TEXT PRIMARY KEY,
+                    message_id TEXT NOT NULL,
                     source_message_id TEXT,
-                    room_id TEXT FOREIGN KEY REFERENCES room (room_id),
+                    room_id TEXT REFERENCES room (room_id),
                     source_room_id TEXT DEFAULT 'NULL',
-                    user_id TEXT FOREIGN KEY REFERENCES user (user_id),
+                    user_id TEXT REFERENCES user (user_id),
                     color TEXT DEFAULT '',
                     returning_chatter INTEGER DEFAULT 0,
                     first_msg INTEGER DEFAULT 0,
                     flags TEXT DEFAULT '',
                     emotes TEXT DEFAULT '',
-                    msg_content TEXT DEFAULT '',
+                    msg_content TEXT DEFAULT ''
                 )
             ''')
 
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS raid (
                     serial INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id TEXT FOREIGN KEY REFERENCES user (user_id),
-                    room_id TEXT FOREIGN KEY REFERENCES room (room_id),
+                    user_id TEXT REFERENCES user (user_id),
+                    room_id TEXT REFERENCES room (room_id),
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     tmi_sent_ts TEXT NOT NULL,
                     msg_id TEXT NOT NULL,
@@ -102,8 +104,8 @@ class DatabaseManager:
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS sub(
                     serial INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id TEXT FOREIGN KEY REFERENCES user (user_id),
-                    room_id TEXT FOREIGN KEY REFERENCES room (room_id),
+                    user_id TEXT REFERENCES user (user_id),
+                    room_id TEXT REFERENCES room (room_id),
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     tmi_sent_ts TEXT NOT NULL,
                     msg_id TEXT NOT NULL,
@@ -116,15 +118,15 @@ class DatabaseManager:
                     sub_plan_name TEXT,
                     sub_plan TEXT NOT NULL,
                     was_gifted TEXT NOT NULL,
-                    system_msg TEXT,
+                    system_msg TEXT
                 )            
             ''')
 
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS subgift(
                     serial INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id TEXT FOREIGN KEY REFERENCES user (user_id),
-                    room_id TEXT FOREIGN KEY REFERENCES room (room_id),
+                    user_id TEXT REFERENCES user (user_id),
+                    room_id TEXT REFERENCES room (room_id),
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     tmi_sent_ts TEXT NOT NULL,
                     msg_id TEXT NOT NULL,
@@ -140,15 +142,15 @@ class DatabaseManager:
                     sender_count INTEGER DEFAULT 0,
                     sub_plan_name TEXT,
                     sub_plan TEXT,
-                    system_msg TEXT,
+                    system_msg TEXT
                 )
             ''')
 
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS submysterygift (
                     serial INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id TEXT FOREIGN KEY REFERENCES user (user_id),
-                    room_id TEXT FOREIGN KEY REFERENCES room (room_id),
+                    user_id TEXT REFERENCES user (user_id),
+                    room_id TEXT REFERENCES room (room_id),
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     tmi_sent_ts TEXT NOT NULL,
                     msg_id TEXT NOT NULL,
@@ -168,14 +170,14 @@ class DatabaseManager:
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS payforward (
                     serial INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id TEXT FOREIGN KEY REFERENCES user (user_id),
-                    room_id TEXT FOREIGN KEY REFERENCES room (room_id,
+                    user_id TEXT REFERENCES user (user_id),
+                    room_id TEXT REFERENCES room (room_id),
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     tmi_sent_ts TEXT NOT NULL,
                     msg_id TEXT NOT NULL,
                     source_msg_id TEXT,
                     prior_gifter_anonymous TEXT,
-                    prior_gifter_id TEXT FOREIGN KEY REFERENCES user (user_id),
+                    prior_gifter_id TEXT REFERENCES user (user_id),
                     prior_gifter_display_name TEXT,
                     prior_gifter_user_name TEXT,
                     recipient_id TEXT,
@@ -188,8 +190,8 @@ class DatabaseManager:
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS paidupgrade (
                     serial INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id TEXT FOREIGN KEY REFERENCES user (user_id),
-                    room_id TEXT FOREIGN KEY REFERENCES room (room_id),
+                    user_id TEXT REFERENCES user (user_id),
+                    room_id TEXT REFERENCES room (room_id),
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     tmi_sent_ts TEXT NOT NULL,
                     msg_id TEXT NOT NULL,
@@ -204,8 +206,8 @@ class DatabaseManager:
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS onetapgift (
                     serial INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id TEXT FOREIGN KEY REFERENCES user (user_id),
-                    room_id TEXT FOREIGN KEY REFERENCES room (room_id),
+                    user_id TEXT REFERENCES user (user_id),
+                    room_id TEXT REFERENCES room (room_id),
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     tmi_sent_ts TEXT NOT NULL,
                     msg_id TEXT NOT NULL,
@@ -243,11 +245,13 @@ class DatabaseManager:
             # maybe redesign?
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS viewermilestone(
-                    room_id TEXT,
-                    user_id TEXT,
+                    serial INTEGER PRIMARY KEY AUTOINCREMENT,
+                    room_id TEXT REFERENCES room (room_id),
+                    user_id TEXT REFERENCES user (user_id),
                     display_name TEXT,
-                    timestamp TIMESTAMP,
-                    streak INTEGER DEFAULT 0
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    streak INTEGER DEFAULT 0,
+                    system_msg TEXT
                 )
             ''')
 

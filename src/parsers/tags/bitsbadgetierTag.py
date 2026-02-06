@@ -8,4 +8,4 @@ class BitsBadgeTierTag(BaseTag):
     msg_param_threshold:int=-42
 
     # general
-    system_msg:str
+    system_msg:str | None = None

@@ -25,7 +25,7 @@ from db.repositories import (AnnouncementRepository,
                              UserRepository,
                              ViewerMilestoneRepository)
 
-from db.services.old_service.service import SaltyService
+from db.services.service import SaltyService
 from db.database import DatabaseManager
 
 PROJECT_ROOT = Path(__file__).parent.parent

@@ -153,9 +153,9 @@ class SaltyService:
                                             tmi_sent_ts=data.tmi_sent_ts,
                                             msg_id=data.msg_id,
                                             source_msg_id=data.source_msg_id,
-                                            bits_spent=data.bits_spent,
-                                            gift_id=data.gift_id,
-                                            user_display_name=data.user_display_name,
+                                            bits_spent=data.msg_param_bits_spent,
+                                            gift_id=data.msg_param_gift_id,
+                                            user_display_name=data.msg_param_user_display_name,
                                             system_msg=data.system_msg))
 
         else:
@@ -165,9 +165,9 @@ class SaltyService:
                                             tmi_sent_ts=data.tmi_sent_ts,
                                             msg_id=data.msg_id,
                                             source_msg_id=data.source_msg_id,
-                                            bits_spent=data.bits_spent,
-                                            gift_id=data.gift_id,
-                                            user_display_name=data.user_display_name,
+                                            bits_spent=data.msg_param_bits_spent,
+                                            gift_id=data.msg_param_gift_id,
+                                            user_display_name=data.msg_param_user_display_name,
                                             system_msg=data.system_msg))
 
 
@@ -182,9 +182,9 @@ class SaltyService:
                                                    tmi_sent_ts=data.tmi_sent_ts,
                                                    msg_id=data.msg_id,
                                                    source_msg_id=data.source_msg_id,
-                                                   sender_login=data.sender_login,
-                                                   sender_name=data.sender_name,
-                                                   sub_plan=data.sub_plan,
+                                                   sender_login=data.msg_param_sender_login,
+                                                   sender_name=data.msg_param_sender_name,
+                                                   sub_plan=data.msg_param_sub_plan,
                                                    system_msg=data.system_msg))
 
         else:
@@ -194,9 +194,9 @@ class SaltyService:
                                                    tmi_sent_ts=data.tmi_sent_ts,
                                                    msg_id=data.msg_id,
                                                    source_msg_id=data.source_msg_id,
-                                                   sender_login=data.sender_login,
-                                                   sender_name=data.sender_name,
-                                                   sub_plan=data.sub_plan,
+                                                   sender_login=data.msg_param_sender_login,
+                                                   sender_name=data.msg_param_sender_name,
+                                                   sub_plan=data.msg_param_sub_plan,
                                                    system_msg=data.system_msg))
 
     def _handlePayforward(self, data:PayforwardTag) -> None:
@@ -210,13 +210,13 @@ class SaltyService:
                                                  tmi_sent_ts=data.tmi_sent_ts,
                                                  msg_id=data.msg_id,
                                                  source_msg_id=data.source_msg_id,
-                                                 prior_gifter_anonymous=data.prior_gifter_anonymous,
-                                                 prior_gifter_id=data.prior_gifter_id,
-                                                 prior_gifter_display_name=data.prior_gifter_display_name,
-                                                 prior_gifter_user_name=data.prior_gifter_user_name,
-                                                 recipient_id=data.recipient_id,
-                                                 recipient_display_name=data.recipient_display_name,
-                                                 recipient_user_name=data.recipient_user_name,
+                                                 prior_gifter_anonymous=data.msg_param_prior_gifter_anonymous,
+                                                 prior_gifter_id=data.msg_param_prior_gifter_id,
+                                                 prior_gifter_display_name=data.msg_param_prior_gifter_display_name,
+                                                 prior_gifter_user_name=data.msg_param_prior_gifter_user_name,
+                                                 recipient_id=data.msg_param_recipient_id,
+                                                 recipient_display_name=data.msg_param_recipient_display_name,
+                                                 recipient_user_name=data.msg_param_recipient_user_name,
                                                  system_msg=data.system_msg))
 
         else:
@@ -226,13 +226,13 @@ class SaltyService:
                                                  tmi_sent_ts=data.tmi_sent_ts,
                                                  msg_id=data.msg_id,
                                                  source_msg_id=data.source_msg_id,
-                                                 prior_gifter_anonymous=data.prior_gifter_anonymous,
-                                                 prior_gifter_id=data.prior_gifter_id,
-                                                 prior_gifter_display_name=data.prior_gifter_display_name,
-                                                 prior_gifter_user_name=data.prior_gifter_user_name,
-                                                 recipient_id=data.recipient_id,
-                                                 recipient_display_name=data.recipient_display_name,
-                                                 recipient_user_name=data.recipient_user_name,
+                                                 prior_gifter_anonymous=data.msg_param_prior_gifter_anonymous,
+                                                 prior_gifter_id=data.msg_param_prior_gifter_id,
+                                                 prior_gifter_display_name=data.msg_param_prior_gifter_display_name,
+                                                 prior_gifter_user_name=data.msg_param_prior_gifter_user_name,
+                                                 recipient_id=data.msg_param_recipient_id,
+                                                 recipient_display_name=data.msg_param_recipient_display_name,
+                                                 recipient_user_name=data.msg_param_recipient_user_name,
                                                  system_msg=data.system_msg))
 
     def _handlePrivmsg(self, data:PrivmsgTag) -> None:
@@ -241,7 +241,7 @@ class SaltyService:
 
         self.privmsg_repo.save(Privmsg(tmi_sent_ts=data.tmi_sent_ts,
                                         message_id=data.message_id,
-                                        source_message_id=data.souce_message_id,
+                                        source_message_id=data.source_message_id,
                                         room_id=data.source_room_id,
                                         source_room_id=data.source_room_id,
                                         user_id=data.user_id,
@@ -263,7 +263,7 @@ class SaltyService:
                                     tmi_sent_ts=data.tmi_sent_ts,
                                     msg_id=data.msg_id,
                                     source_msg_id=data.source_msg_id,
-                                    msg_param_displayName=data.msg_param_displayName,
+                                    msg_param_displayName=data.msg_param_display_name,
                                     msg_param_login=data.msg_param_login,
                                     msg_param_profileImageURL=data.msg_param_profileImageURL,
                                     msg_param_viewerCount=data.msg_param_viewerCount,
@@ -301,14 +301,14 @@ class SaltyService:
                                    tmi_sent_ts=data.tmi_sent_ts,
                                    msg_id=data.msg_id,
                                    source_msg_id=data.source_msg_id,
-                                   cumulative_months=data.cumulative_months,
-                                   months=data.months,
-                                   multimonth_duration=data.multimonth_duration,
-                                   multimonth_tenure=data.multimonth_tenure,
-                                   should_share_streak=data.should_share_streak,
-                                   sub_plan_name=data.sub_plan_name,
-                                   sub_plan=data.sub_plan,
-                                   was_gifted=data.was_gifted,
+                                   cumulative_months=data.msg_param_cumulative_months,
+                                   months=data.msg_param_months,
+                                   multimonth_duration=data.msg_param_multimonth_duration,
+                                   multimonth_tenure=data.msg_param_multimonth_tenure,
+                                   should_share_streak=data.msg_param_should_share_streak,
+                                   sub_plan_name=data.msg_param_sub_plan_name,
+                                   sub_plan=data.msg_param_sub_plan,
+                                   was_gifted=data.msg_param_was_gifted,
                                    system_msg=data.system_msg))
             
         else:
@@ -318,14 +318,14 @@ class SaltyService:
                                    tmi_sent_ts=data.tmi_sent_ts,
                                    msg_id=data.msg_id,
                                    source_msg_id=data.source_msg_id,
-                                   cumulative_months=data.cumulative_months,
-                                   months=data.months,
-                                   multimonth_duration=data.multimonth_duration,
-                                   multimonth_tenure=data.multimonth_tenure,
-                                   should_share_streak=data.should_share_streak,
-                                   sub_plan_name=data.sub_plan_name,
-                                   sub_plan=data.sub_plan,
-                                   was_gifted=data.was_gifted,
+                                   cumulative_months=data.msg_param_cumulative_months,
+                                   months=data.msg_param_months,
+                                   multimonth_duration=data.msg_param_multimonth_duration,
+                                   multimonth_tenure=data.msg_param_multimonth_tenure,
+                                   should_share_streak=data.msg_param_should_share_streak,
+                                   sub_plan_name=data.msg_param_sub_plan_name,
+                                   sub_plan=data.msg_param_sub_plan,
+                                   was_gifted=data.msg_param_was_gifted,
                                    system_msg=data.system_msg))
 
 
@@ -341,17 +341,17 @@ class SaltyService:
                                            tmi_sent_ts=data.tmi_sent_ts,
                                            msg_id=data.msg_id,
                                            source_msg_id=data.source_msg_id,
-                                           community_gift_id=data.community_gift_id,
-                                           fun_string=data.fun_string,
-                                           gift_months=data.gift_months,
-                                           months=data.months,
-                                           origin_id=data.origin_id,
-                                           recipient_id=data.recipient_id,
-                                           recipient_display_name=data.recipient_display_name,
-                                           recipient_user_name=data.recipient_user_name,
-                                           sender_count=data.sender_count,
-                                           sub_plan_name=data.sub_plan_name,
-                                           sub_plan=data.sub_plan,
+                                           community_gift_id=data.msg_param_community_gift_id,
+                                           fun_string=data.msg_param_fun_string,
+                                           gift_months=data.msg_param_gift_months,
+                                           months=data.msg_param_months,
+                                           origin_id=data.msg_param_origin_id,
+                                           recipient_id=data.msg_param_recipient_id,
+                                           recipient_display_name=data.msg_param_recipient_display_name,
+                                           recipient_user_name=data.msg_param_recipient_user_name,
+                                           sender_count=data.msg_param_sender_count,
+                                           sub_plan_name=data.msg_param_sub_plan_name,
+                                           sub_plan=data.msg_param_sub_plan,
                                            system_msg=data.system_msg))
 
         else:
@@ -361,17 +361,17 @@ class SaltyService:
                                            tmi_sent_ts=data.tmi_sent_ts,
                                            msg_id=data.msg_id,
                                            source_msg_id=data.source_msg_id,
-                                           community_gift_id=data.community_gift_id,
-                                           fun_string=data.fun_string,
-                                           gift_months=data.gift_months,
-                                           months=data.months,
-                                           origin_id=data.origin_id,
-                                           recipient_id=data.recipient_id,
-                                           recipient_display_name=data.recipient_display_name,
-                                           recipient_user_name=data.recipient_user_name,
-                                           sender_count=data.sender_count,
-                                           sub_plan_name=data.sub_plan_name,
-                                           sub_plan=data.sub_plan,
+                                           community_gift_id=data.msg_param_community_gift_id,
+                                           fun_string=data.msg_param_fun_string,
+                                           gift_months=data.msg_param_gift_months,
+                                           months=data.msg_param_months,
+                                           origin_id=data.msg_param_origin_id,
+                                           recipient_id=data.msg_param_recipient_id,
+                                           recipient_display_name=data.msg_param_recipient_display_name,
+                                           recipient_user_name=data.msg_param_recipient_user_name,
+                                           sender_count=data.msg_param_sender_count,
+                                           sub_plan_name=data.msg_param_sub_plan_name,
+                                           sub_plan=data.msg_param_sub_plan,
                                            system_msg=data.system_msg))
 
     def _handleSubmysterygift(self, data:SubmysteryTag) -> None:
@@ -385,15 +385,15 @@ class SaltyService:
                                               room_id=data.source_room_id,
                                               tmi_sent_ts=data.tmi_sent_ts,
                                               msg_id=data.msg_id,
-                                              source_msg_id=data.souce_msg_id,
-                                              community_gift_id=data.community_gift_id,
-                                              contribution_type=data.contribution_type,
-                                              current_contributions=data.current_contributions,
-                                              target_contributions=data.target_contributions,
-                                              user_contributions=data.user_contributions,
-                                              mass_gift_count=data.mass_gift_count,
-                                              origin_id=data.origin_id,
-                                              sub_plan=data.sub_plan,
+                                              source_msg_id=data.source_msg_id,
+                                              community_gift_id=data.msg_param_community_gift_id,
+                                              contribution_type=data.msg_param_goal_contribution_type,
+                                              current_contributions=data.msg_param_goal_current_contributions,
+                                              target_contributions=data.msg_param_goal_target_contributions,
+                                              user_contributions=data.msg_param_goal_user_contributions,
+                                              mass_gift_count=data.msg_param_mass_gift_count,
+                                              origin_id=data.msg_param_origin_id,
+                                              sub_plan=data.msg_param_sub_plan,
                                               system_msg=data.system_msg))
 
         else:
@@ -402,15 +402,15 @@ class SaltyService:
                                               room_id=data.room_id,
                                               tmi_sent_ts=data.tmi_sent_ts,
                                               msg_id=data.msg_id,
-                                              source_msg_id=data.souce_msg_id,
-                                              community_gift_id=data.community_gift_id,
-                                              contribution_type=data.contribution_type,
-                                              current_contributions=data.current_contributions,
-                                              target_contributions=data.target_contributions,
-                                              user_contributions=data.user_contributions,
-                                              mass_gift_count=data.mass_gift_count,
-                                              origin_id=data.origin_id,
-                                              sub_plan=data.sub_plan,
+                                              source_msg_id=data.source_msg_id,
+                                              community_gift_id=data.msg_param_community_gift_id,
+                                              contribution_type=data.msg_param_goal_contribution_type,
+                                              current_contributions=data.msg_param_goal_current_contributions,
+                                              target_contributions=data.msg_param_goal_target_contributions,
+                                              user_contributions=data.msg_param_goal_user_contributions,
+                                              mass_gift_count=data.msg_param_mass_gift_count,
+                                              origin_id=data.msg_param_origin_id,
+                                              sub_plan=data.msg_param_sub_plan,
                                               system_msg=data.system_msg))
             
 
@@ -435,13 +435,15 @@ class SaltyService:
             self.viewerMilestone_repo.save(ViewerMilestone(room_id=data.source_room_id,
                                                            user_id=data.user_id,
                                                            display_name=data.display_name,
-                                                           streak=data.param_value))
+                                                           streak=data.param_value,
+                                                           system_msg=data.system_msg))
             
         else:
             self.viewerMilestone_repo.save(ViewerMilestone(room_id=data.room_id,
                                                            user_id=data.user_id,
                                                            display_name=data.display_name,
-                                                           streak=data.param_value))
+                                                           streak=data.param_value,
+                                                           system_msg=data.system_msg))
 
 
 # Helpers
@@ -455,7 +457,7 @@ class SaltyService:
                 badges = data.get('badges').split(',')
                 for badge in badges:
                     if badge.startswith('subscriber'):
-                        data.sub_substreak = int(badge.split('/')[1])
+                        data.sub_streak = int(badge.split('/')[1])
 
             if not self.user_repo.exists(user_id=data.user_id):
             
@@ -479,7 +481,7 @@ class SaltyService:
                                                  room_id=data.source_room_id,
                                                  badges=data.source_badges,
                                                  badge_info=data.source_badge_info,
-                                                 sub=data.sub,
+                                                 subscriber=data.subscriber,
                                                  sub_streak=data.sub_streak,
                                                  vip=data.vip,
                                                  mod=data.mod))
@@ -509,7 +511,7 @@ class SaltyService:
                                                  room_id=data.room_id,
                                                  badges=data.badges,
                                                  badge_info=data.badge_info,
-                                                 sub=data.sub,
+                                                 subscriber=data.subscriber,
                                                  sub_streak=data.sub_streak,
                                                  vip=data.vip,
                                                  mod=data.mod))

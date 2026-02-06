@@ -21,28 +21,28 @@ class TagFactory:
 
         return AnnouncementTag(user_id=raw_tags.get('user-id'),
                                display_name=raw_tags.get('display-name'),
-                               username=raw_tags.get('display-name').lower(),
+                               login=raw_tags.get('login'),
                                badge_info=raw_tags.get('badge-info'),
                                badges=raw_tags.get('badges'),
-                               source_badge_info=raw_tags.get('source-badges-info', 'null'),
-                               source_badges=raw_tags.get('source-badges', 'null'),
-                               turbo='-1',
-                               returning_chatter='-1',
-                               first_msg='-1',
+                               source_badge_info=raw_tags.get('source-badges-info', None),
+                               source_badges=raw_tags.get('source-badges', None),
+                               turbo=-42,
+                               returning_chatter=-42,
+                               first_msg=-42,
                                color=raw_tags.get('color'),
                                emotes=raw_tags.get('emotes'),
                                flags=raw_tags.get('flags'),
                                user_type=raw_tags.get('user-type'),
                                room_id=raw_tags.get('room-id'),
-                               source_room_id=raw_tags.get('source-room-id', 'null'),
-                               room_name='#unknown',
+                               source_room_id=raw_tags.get('source-room-id', None),
+                               room_name=raw_tags.get('room-name', None),
                                id=raw_tags.get('id'),
                                msg_id=raw_tags.get('msg-id'),
-                               source_msg_id=raw_tags.get('source-msg-id', 'null'),
+                               source_msg_id=raw_tags.get('source-msg-id', None),
                                tmi_sent_ts=raw_tags.get('tmi-sent-ts'),
                                param_color=raw_tags.get('msg-param-color'),
-                               system_msg=raw_tags.get('system-msg', 'null'),
-                               msg_content=raw_tags.get('null'))
+                               system_msg=raw_tags.get('system-msg', None),
+                               msg_content=raw_tags.get('message-content'))
 
     @staticmethod
     def createBitsBadgeTierTag(raw_tags:dict):
@@ -334,7 +334,7 @@ class TagFactory:
                           system_msg=raw_tags.get('system-msg'))
     
     @staticmethod
-    def createSubmysterygiftTag(raw_tags:dict) -> SubmysterygiftTag:
+    def createSubmysterygiftTag(raw_tags:dict) -> SubmysteryTag:
         """Create tags for submysterygift messages"""
 
         return SubmysteryTag(room_name=raw_tags.get('room-name'),
@@ -408,26 +408,27 @@ class TagFactory:
 
         return ViewerMilestoneTag(user_id=raw_tags.get('user-id'),
                                   display_name=raw_tags.get('display-name'),
-                                  username=raw_tags.get('display-name').lower(),
+                                  login=raw_tags.get('login'),
                                   badge_info=raw_tags.get('badge-info'),
                                   badges=raw_tags.get('badges'),
-                                  source_badge_info=raw_tags.get('source-badge-info', 'null'),
-                                  source_badges=raw_tags.get('source-badges', 'null'),
-                                  turbo='-1',
-                                  returning_chatter='-1',
-                                  first_msg='-1',
+                                  source_badge_info=raw_tags.get('source-badge-info', None),
+                                  source_badges=raw_tags.get('source-badges', None),
+                                  turbo=-42,
+                                  returning_chatter=-42,
+                                  first_msg=-42,
                                   color=raw_tags.get('color'),
                                   emotes=raw_tags.get('emotes'),
                                   flags=raw_tags.get('flags'),
                                   user_type=raw_tags.get('user-type'),                                  
                                   room_id=raw_tags.get('room-id'),
-                                  source_room_id=raw_tags.get('source-room-id', 'null'),
+                                  source_room_id=raw_tags.get('source-room-id', None),
                                   room_name='#unknown',
                                   id=raw_tags.get('id'),
                                   msg_id=raw_tags.get('msg-id'),
-                                  source_msg_id=raw_tags.get('source-msg-id', 'null'),
+                                  source_msg_id=raw_tags.get('source-msg-id', None),
                                   tmi_sent_ts=raw_tags.get('tmi-sent-ts'),
                                   param_category=raw_tags.get('msg-param-category'),
                                   param_copoReward=int(raw_tags.get('msg-param-copoReward')),
                                   param_id=raw_tags.get('msg-param-id'),
-                                  param_value=int(raw_tags.get('msg-param-value')))
+                                  param_value=int(raw_tags.get('msg-param-value')),
+                                  system_msg=raw_tags.get('system-msg'))

@@ -26,7 +26,7 @@ class RoomStateRepository:
                              followers_only=entry[3],
                              r9k=entry[4],
                              slow=entry[5],
-                             subs_only=entry[6])
+                             sub_only=entry[6])
         return None
 
     def save(self, roomstate:Roomstate) -> None:

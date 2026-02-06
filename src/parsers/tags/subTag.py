@@ -10,9 +10,9 @@ class SubTag(BaseTag):
     msg_param_multimonth_duration:int=-42
     msg_param_multimonth_tenure:int=-42
     msg_param_should_share_streak:int=-42
-    msg_param_sub_plan_name:str
-    msg_param_sub_plan:str
-    msg_param_was_gifted:str
+    msg_param_sub_plan_name:str | None = None
+    msg_param_sub_plan:str | None = None
+    msg_param_was_gifted:str | None = None
 
     # general
-    system_msg:str
+    system_msg:str | None = None

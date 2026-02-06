@@ -24,7 +24,7 @@ class RoomRepository(Saltmine[Room]):
 
         query = '''
                 INSERT OR REPLACE INTO room 
-                (room_id, room_name, added) 
+                (room_id, room_name, created) 
                 VALUES (?,?, CURRENT_TIMESTAMP)
                 '''
         self.db.execute_query(query, (room.room_id, room.room_name))

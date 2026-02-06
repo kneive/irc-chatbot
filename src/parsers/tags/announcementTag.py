@@ -4,6 +4,6 @@ from dataclasses import dataclass
 @dataclass
 class AnnouncementTag(BaseTag):
     
-    param_color:str
-    system_msg:str
-    msg_content:str
+    param_color:str | None = None
+    system_msg:str | None = None
+    msg_content:str | None = None

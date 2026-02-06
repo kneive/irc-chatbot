@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 @dataclass
 class RoomstateTag:
-    room_id:str
+    room_id:str | None = None
 
     emote_only:int=-42
     followers_only:int=-42

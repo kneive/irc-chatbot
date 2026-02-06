@@ -5,11 +5,11 @@ from .baseTag import BaseTag
 class PaidupgradeTag(BaseTag):
 
     # giftpaidupgrade
-    msg_param_sender_login:str
-    msg_param_sender_name:str
+    msg_param_sender_login:str | None = None
+    msg_param_sender_name:str | None = None
     
     # primepaidupgrade 
-    msg_param_sub_plan:str
+    msg_param_sub_plan:str | None = None
 
     # general
-    system_msg:str
+    system_msg:str | None = None
