@@ -2,10 +2,10 @@ from dataclasses import dataclass
 
 @dataclass
 class RoomstateTag:
-    room_id:str = 'null'
+    room_id:str
 
-    emote_only:str = '-1'
-    followers_only:str = '-1'
-    r9k:str = '-1'
-    slow_mode:str = '-1'
-    sub_only:str = '-1'
+    emote_only:int=-42
+    followers_only:int=-42
+    r9k:int=-42
+    slow_mode:int=-42
+    sub_only:int=-42

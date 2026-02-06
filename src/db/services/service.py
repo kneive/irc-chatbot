@@ -1,35 +1,48 @@
 
 from ..repositories import (AnnouncementRepository,
-                            BitsRepository, 
-                            MessageRepository,
+                            BitsbadgetierRepository, 
+                            OnetapgiftRepository,
+                            PaidupgradeRepository,
+                            PayforwardRepository,
+                            PrivmsgRepository,
                             RaidRepository,
                             RoomRepository,
                             RoomStateRepository,
                             SubRepository,
                             SubgiftRepository,
+                            SubmysteryRepository,
                             UserRepository,  
-                            UserInRoomRepository,
+                            UserRoomRepository,
                             UserlistRepository,
                             ViewerMilestoneRepository)
 from ..models import (Announcement,
-                      User,
+                      Bitsbadgetier,
+                      Onetapgift,
+                      Payforward,
+                      Paidupgrade, 
+                      Privmsg,
                       Raid, 
                       Room,
                       Roomstate, 
-                      UserInRoom, 
-                      MessageInRoom, 
                       Sub, 
-                      Subgift, 
-                      UserListEntry,
+                      Subgift,
+                      Submystery, 
+                      User,
+                      Userlist,
+                      UserRoom, 
                       ViewerMilestone)
 
 from parsers.tags import (AnnouncementTag, 
-                          BaseTag, 
+                          BaseTag,
+                          BitsBadgeTierTag,
+                          PaidupgradeTag,
+                          PayforwardTag,
                           PrivmsgTag,
                           RaidTag, 
-                          RoomstateTag, 
+                          RoomstateTag,
+                          OnetapgiftTag, 
                           SubgiftTag, 
-                          SubmysterygiftTag,
+                          SubmysteryTag,
                           SubTag, 
                           ViewerMilestoneTag)
 
@@ -42,28 +55,36 @@ class SaltyService:
 
     def __init__(self,
                  announcement_repo: AnnouncementRepository,
-                 bits_repo: BitsRepository,
-                 message_repo: MessageRepository,
+                 bitsbadge_repo: BitsbadgetierRepository,
+                 paidupgrade_repo: PaidupgradeRepository,
+                 payforward_repo: PayforwardRepository,
+                 privmsg_repo: PrivmsgRepository,
                  raid_repo: RaidRepository,
                  room_repo: RoomRepository,
                  roomstate_repo: RoomStateRepository,
+                 onetap_repo: OnetapgiftRepository,
                  sub_repo: SubRepository,
                  subgift_repo: SubgiftRepository,
+                 submystery_repo: SubmysteryRepository,
                  user_repo: UserRepository,
-                 userInRoom_repo: UserInRoomRepository,
+                 userRoom_repo: UserRoomRepository,
                  userlist_repo: UserlistRepository,
                  viewerMilestone_repo: ViewerMilestoneRepository):
         
         self.announcement_repo = announcement_repo
-        self.bits_repo = bits_repo
-        self.message_repo = message_repo
+        self.bitsbadge_repo = bitsbadge_repo
+        self.onetap_repo = onetap_repo
+        self.paidupgrade_repo = paidupgrade_repo
+        self.payforward_repo = payforward_repo
+        self.privmsg_repo = privmsg_repo
         self.raid_repo = raid_repo
         self.room_repo = room_repo
         self.roomstate_repo = roomstate_repo
         self.sub_repo = sub_repo
         self.subgift_repo = subgift_repo
+        self.submystery_repo = submystery_repo
         self.user_repo = user_repo
-        self.userInRoom_repo = userInRoom_repo
+        self.userRoom_repo = userRoom_repo
         self.userlist_repo = userlist_repo
         self.viewerMilestone_repo = viewerMilestone_repo
 
@@ -75,7 +96,7 @@ class SaltyService:
             return
         
         if parsed.message_type == 'PRIVMSG':
-            self._handlePrivMessage(parsed.data)
+            self._handlePrivmsg(parsed.data)
         elif parsed.message_type == 'SUBSCRIPTION':
             self._handleSubscription(parsed.data)
         elif parsed.message_type == 'SUBGIFT':
@@ -86,132 +107,168 @@ class SaltyService:
             self._handleAnnouncement(parsed.data)
         elif parsed.message_type == 'VIEWERMILESTONE':
             self._handleViewerMilestone(parsed.data)
-        elif parsed.message_type == 'JOIN':
-            self._handleJoin(parsed.data)
-        elif parsed.message_type == 'PART':
-            self._handlePart(parsed.data)
+        elif parsed.message_type in ['JOIN', 'PART']:
+            self._handleUserlist(parsed.data)
         elif parsed.message_type == 'ROOMSTATE':
             self._handleRoomstate(parsed.data)
         elif parsed.message_type == 'RAID':
             self._handleRaid(parsed.data)
+        elif parsed.message_type == ['COMMUNITYPAYFORWARD', 'STANDARDPAYFORWARD']:
+            self._handlePayforward(parsed.data)
+        elif parsed.message_type == ['PRIMEPAIDUPGRADE', 'GIFTPAIDUPGRADE']:
+            self._handlePaidupgrade(parsed.data)
+        elif parsed.message_type == 'ONETAPGIFTREDEEMED':
+            self._handleOnetapgift(parsed.data)
+        # elif parsed.message_type == 'BITSBADGETIER': no table and repository        
 
-    def _handlePrivMessage(self, data:PrivmsgTag) -> None:
-        """Handles PRIVMSG messages"""
+
+    def _handleAnnouncement(self, data:AnnouncementTag) -> None:
+        """Handles ANNOUNCEMENT messages"""        
+
+        self._checkUserRoomUserInRoom(data)
 
         if data.msg_id == 'sharedchatnotice':
-  
-            self._checkUserRoomUserInRoom(data)
+            self.announcement_repo.save(Announcement(room_id=data.source_room_id,
+                                                     user_id=data.user_id,
+                                                     display_name=data.display_name,
+                                                     msg_content=data.msg_content))
+            
+        else:
+            self.announcement_repo.save(Announcement(room_id=data.room_id,
+                                                     user_id=data.user_id,
+                                                     display_name=data.display_name,
+                                                     msg_content=data.msg_content))
 
-            # add message to message_in_room table
-            self.message_repo.save(MessageInRoom(message_id=data.id,
+
+    # _handlebitsbadge
+
+    def _handleOnetapgift(self, data:OnetapgiftTag) -> None:
+
+        self._checkUserRoomUserInRoom(data)
+
+        if data.msg_id == 'sharedchatnotice':
+
+            self.onetap_repo.save(Onetapgift(user_id=data.user_id,
+                                            room_id=data.source_room_id,
+                                            tmi_sent_ts=data.tmi_sent_ts,
+                                            msg_id=data.msg_id,
+                                            source_msg_id=data.source_msg_id,
+                                            bits_spent=data.bits_spent,
+                                            gift_id=data.gift_id,
+                                            user_display_name=data.user_display_name,
+                                            system_msg=data.system_msg))
+
+        else:
+
+            self.onetap_repo.save(Onetapgift(user_id=data.user_id,
+                                            room_id=data.room_id,
+                                            tmi_sent_ts=data.tmi_sent_ts,
+                                            msg_id=data.msg_id,
+                                            source_msg_id=data.source_msg_id,
+                                            bits_spent=data.bits_spent,
+                                            gift_id=data.gift_id,
+                                            user_display_name=data.user_display_name,
+                                            system_msg=data.system_msg))
+
+
+    def _handlePaidupgrade(self, data:PaidupgradeTag) -> None:
+
+        self._checkUserRoomUserInRoom(data)
+
+        if data.msg_id == 'sharedchatnotice':
+
+            self.paidupgrade_repo.save(Paidupgrade(user_id=data.user_id,
+                                                   room_id=data.source_room_id,
+                                                   tmi_sent_ts=data.tmi_sent_ts,
+                                                   msg_id=data.msg_id,
+                                                   source_msg_id=data.source_msg_id,
+                                                   sender_login=data.sender_login,
+                                                   sender_name=data.sender_name,
+                                                   sub_plan=data.sub_plan,
+                                                   system_msg=data.system_msg))
+
+        else:
+
+            self.paidupgrade_repo.save(Paidupgrade(user_id=data.user_id,
+                                                   room_id=data.room_id,
+                                                   tmi_sent_ts=data.tmi_sent_ts,
+                                                   msg_id=data.msg_id,
+                                                   source_msg_id=data.source_msg_id,
+                                                   sender_login=data.sender_login,
+                                                   sender_name=data.sender_name,
+                                                   sub_plan=data.sub_plan,
+                                                   system_msg=data.system_msg))
+
+    def _handlePayforward(self, data:PayforwardTag) -> None:
+
+        self._checkUserRoomUserInRoom(data)
+
+        if data.msg_id == 'sharedchatnotice':
+
+            self.payforward_repo.save(Payforward(user_id=data.user_id,
                                                  room_id=data.source_room_id,
-                                                 user_id=data.user_id,
-                                                 reply_message_id=data.reply_parent_msg_id,
-                                                 reply_user_id=data.reply_parent_user_id,
-                                                 reply_display_name=data.reply_parent_display_name,
-                                                 thread_message_id=data.reply_thread_parent_msg_id,
-                                                 thread_user_id=data.reply_thread_parent_user_id,
-                                                 thread_display_name=data.reply_thread_parent_display_name,
-                                                 content=data.message_content))
+                                                 tmi_sent_ts=data.tmi_sent_ts,
+                                                 msg_id=data.msg_id,
+                                                 source_msg_id=data.source_msg_id,
+                                                 prior_gifter_anonymous=data.prior_gifter_anonymous,
+                                                 prior_gifter_id=data.prior_gifter_id,
+                                                 prior_gifter_display_name=data.prior_gifter_display_name,
+                                                 prior_gifter_user_name=data.prior_gifter_user_name,
+                                                 recipient_id=data.recipient_id,
+                                                 recipient_display_name=data.recipient_display_name,
+                                                 recipient_user_name=data.recipient_user_name,
+                                                 system_msg=data.system_msg))
 
         else:
 
-            self._checkUserRoomUserInRoom(data)
-
-            # add message to message_in_room table
-            self.message_repo.save(MessageInRoom(message_id=data.id,
+            self.payforward_repo.save(Payforward(user_id=data.user_id,
                                                  room_id=data.room_id,
-                                                 user_id=data.user_id,
-                                                 reply_message_id=data.reply_parent_msg_id,
-                                                 reply_user_id=data.reply_parent_user_id,
-                                                 reply_display_name=data.reply_parent_display_name,
-                                                 thread_message_id=data.reply_thread_parent_msg_id,
-                                                 thread_user_id=data.reply_thread_parent_user_id,
-                                                 thread_display_name=data.reply_thread_parent_display_name,
-                                                 content=data.message_content))
+                                                 tmi_sent_ts=data.tmi_sent_ts,
+                                                 msg_id=data.msg_id,
+                                                 source_msg_id=data.source_msg_id,
+                                                 prior_gifter_anonymous=data.prior_gifter_anonymous,
+                                                 prior_gifter_id=data.prior_gifter_id,
+                                                 prior_gifter_display_name=data.prior_gifter_display_name,
+                                                 prior_gifter_user_name=data.prior_gifter_user_name,
+                                                 recipient_id=data.recipient_id,
+                                                 recipient_display_name=data.recipient_display_name,
+                                                 recipient_user_name=data.recipient_user_name,
+                                                 system_msg=data.system_msg))
 
-    def _handleSubscription(self, data:SubTag) -> None:
-        """Handles SUB messages"""
+    def _handlePrivmsg(self, data:PrivmsgTag) -> None:
 
         self._checkUserRoomUserInRoom(data)
 
-        if data.msg_id == 'sharedchatnotice':
+        self.privmsg_repo.save(Privmsg(tmi_sent_ts=data.tmi_sent_ts,
+                                        message_id=data.message_id,
+                                        source_message_id=data.souce_message_id,
+                                        room_id=data.source_room_id,
+                                        source_room_id=data.source_room_id,
+                                        user_id=data.user_id,
+                                        color=data.color,
+                                        returning_chatter=data.returning_chatter,
+                                        first_msg=data.first_msg,
+                                        flags=data.flags,
+                                        emotes=data.emotes,
+                                        msg_content=data.msg_content))
+
+    def _handleRaid(self, data:RaidTag) -> None:
+        """Handles RAID messages"""
+
+        self._checkUserRoomUserInRoom(data)
+        # custom check for room and user
+
+        self.raid_repo.save(Raid(user_id=data.user_id,
+                                    room_id=data.source_room_id,
+                                    tmi_sent_ts=data.tmi_sent_ts,
+                                    msg_id=data.msg_id,
+                                    source_msg_id=data.source_msg_id,
+                                    msg_param_displayName=data.msg_param_displayName,
+                                    msg_param_login=data.msg_param_login,
+                                    msg_param_profileImageURL=data.msg_param_profileImageURL,
+                                    msg_param_viewerCount=data.msg_param_viewerCount,
+                                    system_msg=data.system_msg))
     
-            self.sub_repo.save(Sub(user_id=data.user_id,
-                                   room_id=data.source_room_id,
-                                   message_id=data.id,
-                                   gift_id=MISSING_STR,
-                                   sub_plan=data.sub_plan,
-                                   months=int(data.months),
-                                   gift_months=MISSING_NUM,
-                                   multimonth_duration=int(data.multimonth_duration),
-                                   multimonth_tenure=int(data.multimonth_tenure),
-                                   streak_months=MISSING_NUM,
-                                   share_streak=int(data.should_share_streak),
-                                   cumulative=int(data.cumulative_months)))
-            
-        else:
-            
-            self.sub_repo.save(Sub(user_id=data.user_id,
-                                   room_id=data.room_id,
-                                   message_id=data.id,
-                                   gift_id=MISSING_STR,
-                                   sub_plan=data.sub_plan,
-                                   months=int(data.months),
-                                   gift_months=MISSING_NUM,
-                                   multimonth_duration=int(data.multimonth_duration),
-                                   multimonth_tenure=int(data.multimonth_tenure),
-                                   streak_months=MISSING_NUM,
-                                   share_streak=int(data.should_share_streak),
-                                   cumulative=int(data.cumulative_months)))
-
-
-    def _handleSubgift(self, data:SubgiftTag) -> None:
-        """Handles SUBGIFT messages"""
-
-        self._checkUserRoomUserInRoom(data)
-
-        if data.msg_id == 'sharedchatnotice':
-
-            self.subgift_repo.save(Subgift(user_id=data.user_id,
-                                           room_id=data.source_room_id,
-                                           gift_id=data.gift_id,
-                                           gift_count=MISSING_NUM,
-                                           gifter_total=int(data.sender_count),
-                                           sub_plan=data.sub_plan))
-
-        else:
-
-            self.subgift_repo.save(Subgift(user_id=data.user_id,
-                                           room_id=data.room_id,
-                                           gift_id=data.gift_id,
-                                           gift_count=MISSING_NUM,
-                                           gifter_total=int(data.sender_count),
-                                           sub_plan=data.sub_plan))
-
-    def _handleSubmysterygift(self, data:SubmysterygiftTag) -> None:
-        """Handles SUBMYSTERYGIFT messages"""
-
-        self._checkUserRoomUserInRoom(data)
-
-        if data.msg_id == 'sharedchatnotice':
-
-            self.subgift_repo.save(Subgift(user_id=data.user_id,
-                                           room_id=data.source_room_id,
-                                           gift_id=data.gift_id,
-                                           gift_count=int(data.mass_gift_count),
-                                           gifter_total=int(data.sender_count),
-                                           sub_plan=data.sub_plan))
-
-        else:
-
-            self.subgift_repo.save(Subgift(user_id=data.user_id,
-                                           room_id=data.room_id,
-                                           gift_id=data.gift_id,
-                                           gift_count=int(data.mass_gift_count),
-                                           gifter_total=int(data.sender_count),
-                                           sub_plan=data.sub_plan))
-
     def _handleRoomstate(self, data:RoomstateTag) -> None:
         """Handles ROOMSTATE messages"""
 
@@ -226,47 +283,148 @@ class SaltyService:
                     setattr(data, key, getattr(roomstate, key))
 
         self.roomstate_repo.save(Roomstate(room_id=data.room_id,
-                                           followers_only=int(data.followers_only),
-                                           sub_only=int(data.sub_only),
-                                           emote_only=int(data.emote_only),
-                                           slow_mode=int(data.slow_mode),
-                                           r9k=int(data.r9k)))
+                                           followers_only=data.followers_only,
+                                           sub_only=data.sub_only,
+                                           emote_only=data.emote_only,
+                                           slow_mode=data.slow_mode,
+                                           r9k=data.r9k))
 
-    def _handleRaid(self, data:RaidTag) -> None:
-        """Handles RAID messages"""
+    def _handleSubscription(self, data:SubTag) -> None:
+        """Handles SUB messages"""
 
         self._checkUserRoomUserInRoom(data)
 
         if data.msg_id == 'sharedchatnotice':
-            self.raid_repo.save(Raid(room_id=data.source_room_id,
-                                     room_name=data.room_name,
-                                     user_id=data.user_id,
-                                     display_name=data.display_name,
-                                     viewer_count=int(data.msg_param_viewerCount)))
-        else:
-            self.raid_repo.save(Raid(room_id=data.room_id,
-                                     room_name=data.room_name,
-                                     user_id=data.user_id,
-                                     display_name=data.display_name,
-                                     viewer_count=int(data.msg_param_viewerCount)))
-
-
-    def _handleAnnouncement(self, data:AnnouncementTag) -> None:
-        """Handles ANNOUNCEMENT messages"""
-        
-        self._checkUserRoomUserInRoom(data)
-
-        if data.msg_id == 'sharedchatnotice':
-            self.announcement_repo.save(Announcement(room_id=data.source_room_id,
-                                                     user_id=data.user_id,
-                                                     display_name=data.display_name,
-                                                     msg_content=data.msg_content))
+    
+            self.sub_repo.save(Sub(user_id=data.user_id,
+                                   room_id=data.source_room_id,
+                                   tmi_sent_ts=data.tmi_sent_ts,
+                                   msg_id=data.msg_id,
+                                   source_msg_id=data.source_msg_id,
+                                   cumulative_months=data.cumulative_months,
+                                   months=data.months,
+                                   multimonth_duration=data.multimonth_duration,
+                                   multimonth_tenure=data.multimonth_tenure,
+                                   should_share_streak=data.should_share_streak,
+                                   sub_plan_name=data.sub_plan_name,
+                                   sub_plan=data.sub_plan,
+                                   was_gifted=data.was_gifted,
+                                   system_msg=data.system_msg))
             
         else:
-            self.announcement_repo.save(Announcement(room_id=data.room_id,
-                                                     user_id=data.user_id,
-                                                     display_name=data.display_name,
-                                                     msg_content=data.msg_content))
+            
+            self.sub_repo.save(Sub(user_id=data.user_id,
+                                   room_id=data.source_room_id,
+                                   tmi_sent_ts=data.tmi_sent_ts,
+                                   msg_id=data.msg_id,
+                                   source_msg_id=data.source_msg_id,
+                                   cumulative_months=data.cumulative_months,
+                                   months=data.months,
+                                   multimonth_duration=data.multimonth_duration,
+                                   multimonth_tenure=data.multimonth_tenure,
+                                   should_share_streak=data.should_share_streak,
+                                   sub_plan_name=data.sub_plan_name,
+                                   sub_plan=data.sub_plan,
+                                   was_gifted=data.was_gifted,
+                                   system_msg=data.system_msg))
+
+
+    def _handleSubgift(self, data:SubgiftTag) -> None:
+        """Handles SUBGIFT messages"""
+
+        self._checkUserRoomUserInRoom(data)
+
+        if data.msg_id == 'sharedchatnotice':
+
+            self.subgift_repo.save(Subgift(user_id=data.user_id,
+                                           room_id=data.source_room_id,
+                                           tmi_sent_ts=data.tmi_sent_ts,
+                                           msg_id=data.msg_id,
+                                           source_msg_id=data.source_msg_id,
+                                           community_gift_id=data.community_gift_id,
+                                           fun_string=data.fun_string,
+                                           gift_months=data.gift_months,
+                                           months=data.months,
+                                           origin_id=data.origin_id,
+                                           recipient_id=data.recipient_id,
+                                           recipient_display_name=data.recipient_display_name,
+                                           recipient_user_name=data.recipient_user_name,
+                                           sender_count=data.sender_count,
+                                           sub_plan_name=data.sub_plan_name,
+                                           sub_plan=data.sub_plan,
+                                           system_msg=data.system_msg))
+
+        else:
+
+            self.subgift_repo.save(Subgift(user_id=data.user_id,
+                                           room_id=data.room_id,
+                                           tmi_sent_ts=data.tmi_sent_ts,
+                                           msg_id=data.msg_id,
+                                           source_msg_id=data.source_msg_id,
+                                           community_gift_id=data.community_gift_id,
+                                           fun_string=data.fun_string,
+                                           gift_months=data.gift_months,
+                                           months=data.months,
+                                           origin_id=data.origin_id,
+                                           recipient_id=data.recipient_id,
+                                           recipient_display_name=data.recipient_display_name,
+                                           recipient_user_name=data.recipient_user_name,
+                                           sender_count=data.sender_count,
+                                           sub_plan_name=data.sub_plan_name,
+                                           sub_plan=data.sub_plan,
+                                           system_msg=data.system_msg))
+
+    def _handleSubmysterygift(self, data:SubmysteryTag) -> None:
+        """Handles SUBMYSTERYGIFT messages"""
+
+        self._checkUserRoomUserInRoom(data)
+
+        if data.msg_id == 'sharedchatnotice':
+
+            self.subgift_repo.save(Submystery(user_id=data.user_id,
+                                              room_id=data.source_room_id,
+                                              tmi_sent_ts=data.tmi_sent_ts,
+                                              msg_id=data.msg_id,
+                                              source_msg_id=data.souce_msg_id,
+                                              community_gift_id=data.community_gift_id,
+                                              contribution_type=data.contribution_type,
+                                              current_contributions=data.current_contributions,
+                                              target_contributions=data.target_contributions,
+                                              user_contributions=data.user_contributions,
+                                              mass_gift_count=data.mass_gift_count,
+                                              origin_id=data.origin_id,
+                                              sub_plan=data.sub_plan,
+                                              system_msg=data.system_msg))
+
+        else:
+
+            self.subgift_repo.save(Submystery(user_id=data.user_id,
+                                              room_id=data.room_id,
+                                              tmi_sent_ts=data.tmi_sent_ts,
+                                              msg_id=data.msg_id,
+                                              source_msg_id=data.souce_msg_id,
+                                              community_gift_id=data.community_gift_id,
+                                              contribution_type=data.contribution_type,
+                                              current_contributions=data.current_contributions,
+                                              target_contributions=data.target_contributions,
+                                              user_contributions=data.user_contributions,
+                                              mass_gift_count=data.mass_gift_count,
+                                              origin_id=data.origin_id,
+                                              sub_plan=data.sub_plan,
+                                              system_msg=data.system_msg))
+            
+
+    def _handleUserlist(self, data:dict) -> None:
+
+        # handles JOIN and PART
+        if self.room_repo.exists_by_name(room_name=data.get('room-name')):
+            data['room-id'] = self.room_repo.get_by_name(room_name=data.get('room-name'))
+
+        self.userlist_repo.save(Userlist(room_name=data.get('room-name'),
+                                            room_id=data.get('room-id', None),
+                                            username=data.get('display-name'),
+                                            join_part=data.get('msg-type')))
+
 
     def _handleViewerMilestone(self, data:ViewerMilestoneTag) -> None:
         """Handles VIEWERMILESTONE messagers"""
@@ -286,54 +444,45 @@ class SaltyService:
                                                            streak=data.param_value))
 
 
-    def _handleJoin(self, data:dict) -> None:
-        """Handles JOIN messages"""
-
-        self.userlist_repo.save(UserListEntry(room_name=data.get('room-name'),
-                                              display_name=data.get('display-name'),
-                                              join_part=data.get('msg-type')))
-
-    def _handlePart(self, data:dict) -> None:
-        """Handles PART messages"""
-
-        self.userlist_repo.save(UserListEntry(room_name=data.get('room-name'),
-                                              display_name=data.get('display-name'),
-                                              join_part=data.get('msg-type')))
-
 # Helpers
 
     def _checkUserRoomUserInRoom(self, data:BaseTag) -> None:
 
         if data.msg_id == 'sharedchatnotice':
 
+            # extract substreak
+            if data.get('badges') != '':
+                badges = data.get('badges').split(',')
+                for badge in badges:
+                    if badge.startswith('subscriber'):
+                        data.sub_substreak = int(badge.split('/')[1])
 
             if not self.user_repo.exists(user_id=data.user_id):
             
                 # check whether user exists in user table
                 self.user_repo.save(User(user_id=data.user_id,
-                                        display_name=data.display_name,
-                                        username=data.username,
-                                        color=data.color,
-                                        turbo=int(data.turbo)))
+                                         login=data.login,
+                                         display_name=data.display_name,
+                                         user_type=data.user_type,
+                                         turbo=data.turbo))
 
             # check whether room and source-room exist in room table
             if not self.room_repo.exists(room_id=data.source_room_id):
 
                 self.room_repo.save(Room(room_id=data.source_room_id,
-                                        room_name=data.room_name))
+                                         room_name=data.room_name))
 
             # check whether user exists in user_in_room table
-            if not self.userInRoom_repo.exists(room_id=data.source_room_id, user_id=data.user_id):
+            if not self.userRoom_repo.exists(room_id=data.source_room_id, user_id=data.user_id):
 
-                self.userInRoom_repo.save(UserInRoom(room_id=data.source_room_id,
-                                                     user_id=data.user_id,
-                                                     returning_chatter=int(data.returning_chatter),
-                                                     first_message=int(data.first_msg),
-                                                     sub=int(data.sub),
-                                                     vip=int(data.vip),
-                                                     mod=int(data.mod),
-                                                     badges=data.source_badges,
-                                                     user_type=data.user_type))
+                self.userRoom_repo.save(UserRoom(user_id=data.user_id,
+                                                 room_id=data.source_room_id,
+                                                 badges=data.source_badges,
+                                                 badge_info=data.source_badge_info,
+                                                 sub=data.sub,
+                                                 sub_streak=data.sub_streak,
+                                                 vip=data.vip,
+                                                 mod=data.mod))
         
         else:
 
@@ -341,10 +490,10 @@ class SaltyService:
             if not self.user_repo.exists(user_id=data.user_id):
                 
                 self.user_repo.save(User(user_id=data.user_id,
+                                         login=data.login,
                                          display_name=data.display_name,
-                                         username=data.username,
-                                         color=data.color,
-                                         turbo=int(data.turbo)))
+                                         user_type=data.user_type,
+                                         turbo=data.turbo))
 
             # check whether room and source-room exist in room table
             if not self.room_repo.exists(room_id=data.room_id):
@@ -354,14 +503,13 @@ class SaltyService:
 
 
             # check whether user exists in user_in_room table
-            if not self.userInRoom_repo.exists(room_id=data.room_id, user_id=data.user_id):
+            if not self.userRoom_repo.exists(room_id=data.room_id, user_id=data.user_id):
                 
-                self.userInRoom_repo.save(UserInRoom(room_id=data.room_id,
-                                                     user_id=data.user_id,
-                                                     returning_chatter=int(data.returning_chatter),
-                                                     first_message=int(data.first_msg),
-                                                     sub=int(data.sub),
-                                                     vip=int(data.vip),
-                                                     mod=int(data.mod),
-                                                     badges=data.badges,
-                                                     user_type=data.user_type))
+                self.userRoom_repo.save(UserRoom(user_id=data.user_id,
+                                                 room_id=data.room_id,
+                                                 badges=data.badges,
+                                                 badge_info=data.badge_info,
+                                                 sub=data.sub,
+                                                 sub_streak=data.sub_streak,
+                                                 vip=data.vip,
+                                                 mod=data.mod))

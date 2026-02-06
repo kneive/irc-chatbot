@@ -11,6 +11,14 @@ class RoomRepository(Saltmine[Room]):
     def get_by_id(self, room_id:str) -> Optional[Room]:
         pass
 
+    def get_by_name(self, room_name:str) -> Optional[Room]:
+        """Get all entries for a given name. We always return the first entry."""
+
+        query = 'SELECT room_id FROM room WHERE room_name = ?'
+        cursor = self.db.execute_query(query, (room_name,))
+        entries = cursor.fetchall()
+        return entries[0]
+
     def save(self, room:Room) -> None:
         """Insert or update a room in room table"""
 
@@ -26,3 +34,9 @@ class RoomRepository(Saltmine[Room]):
 
         query = 'SELECT 1 FROM room WHERE room_id = ?'
         return self.db.execute_query(query, (room_id,)) is not None
+    
+    def exists_by_name(self, room_name:str) -> bool:
+        """Checks whether room_name exists in room table"""
+
+        query = 'SELECT 1 FROM room WHERE room_name = ?'
+        return self.db.execute_query(query, (room_name,)) is not None

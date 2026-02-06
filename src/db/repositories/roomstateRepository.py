@@ -1,6 +1,6 @@
+from typing import List, Optional
 from ..database import DatabaseManager
 from ..models import Roomstate
-from typing import List, Optional
 
 class RoomStateRepository:
 
@@ -11,8 +11,8 @@ class RoomStateRepository:
         """Get the state of a room by room_id from roomstate table"""
         
         query = '''
-                SELECT room_id, timestamp, followers_only, sub_only, emote_only, 
-                       slow_mode, r9k
+                SELECT timestamp, room_id, emote_only, followers_only, r9k,
+                       slow, subs_only
                 FROM roomstate
                 WHERE room_id = ?
                 '''
@@ -20,13 +20,13 @@ class RoomStateRepository:
         entry = self.db.execute_query(query, (room_id,))
 
         if entry:
-            return Roomstate(room_id=entry[0],
-                             timestamp=entry[1],
-                             followers_only=entry[2],
-                             sub_only=entry[3],
-                             emote_only=entry[4],
-                             slow_mode=entry[5],
-                             r9k=entry[6])
+            return Roomstate(timestamp=entry[0],
+                             room_id=entry[1],
+                             emote_only=entry[2],
+                             followers_only=entry[3],
+                             r9k=entry[4],
+                             slow=entry[5],
+                             subs_only=entry[6])
         return None
 
     def save(self, roomstate:Roomstate) -> None:
@@ -34,8 +34,8 @@ class RoomStateRepository:
         
         query = '''
                 INSERT OR REPLACE INTO roomstate
-                (room_id, timestamp, followers_only, sub_only, emote_only, 
-                slow_mode, r9k)
+                (timestamp, room_id, emote_only, followers_only, r9k, slow, 
+                subs_only)
                 VALUES (?,CURRENT_TIMESTAMP,?,?,?,?,?)
                 '''
         self.db.execute_query(query, (roomstate.room_id,

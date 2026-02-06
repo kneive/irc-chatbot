@@ -1,33 +1,31 @@
-from ..database import DatabaseManager
-from ..models import UserListEntry
 from typing import List, Optional
+from ..database import DatabaseManager
+from ..models import Userlist
 
 class UserlistRepository:
 
     def __init__(self, db_manager:DatabaseManager):
         self.db = db_manager
-    
-    def get_by_name(self, room_name:str, display_name:str) -> Optional[List[UserListEntry]]:
-        """Get entries from userlist table by display_name and room_name"""
+
+    def get_by_id(self, seriall:int) -> Optional[Userlist]:
         pass
 
-    def save(self, entry:UserListEntry) -> None:
-        """Insert an entry into userlist table"""
+    def save(self, userlist:Userlist) -> None:
+        """Insert a userlist into userlist table"""
 
         query = '''
                 INSERT INTO userlist
-                (room_name, display_name, join_part, timestamp)
-                VALUES (?,?,?,CURRENT_TIMESTAMP)
+                (timestamp, room_name, room_id, username, join_part)
+                VALUES (CURRENT_TIMESTAMP,?,?,?,?)
                 '''
-        self.db.execute_query(query, (entry.room_name,
-                                      entry.display_name,
-                                      entry.join_part))
         
-    def exists(self, room_name:str, display_name:str) -> bool:
-        """
-        Checks whether at least one entry in userlist table 
-        exists for room_name + user_name
-        """
+        self.db.execute_query(query, (userlist.room_name,
+                                      userlist.room_id,
+                                      userlist.username,
+                                      userlist.join_part))
         
-        query = 'SELECT 1 FROM userlist WHERE room_name = ? AND display_name = ?'
-        return self.db.execute_query(query, (room_name, display_name,)) is not None
+    def exists(self, room_name:str, username:str) -> bool:
+        """Checks whether user username ever appeared in room room_name"""
+
+        query = 'SELECT 1 FROM userlist WHERE room_name = ? AND username = ?'
+        return self.db.execute_query(query, (room_name, username,)) is not None

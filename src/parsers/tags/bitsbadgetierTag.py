@@ -5,7 +5,7 @@ from .baseTag import BaseTag
 class BitsBadgeTierTag(BaseTag):
 
     # msg params 
-    msg_param_threshold:int
+    msg_param_threshold:int=-42
 
     # general
     system_msg:str

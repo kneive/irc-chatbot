@@ -4,10 +4,11 @@ from .baseTag import BaseTag
 @dataclass
 class RaidTag(BaseTag):
 
-    msg_param_displayName:str = 'null'
-    msg_param_login:str = 'null'
-    msg_param_profileImageURL:str = 'null'
-    msg_param_viewerCount:str = '-1'
+    # raid (not in unraid)
+    msg_param_display_name:str
+    msg_param_login:str
+    msg_param_profileImageURL:str
+    msg_param_viewerCount:int=-42
 
-    # additional fields
-    msg_content:str = 'null'
+    # general
+    system_msg:str

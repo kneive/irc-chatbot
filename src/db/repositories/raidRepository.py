@@ -1,6 +1,6 @@
+from typing import List, Optional
 from ..database import DatabaseManager
 from ..models import Raid
-from typing import List, Optional
 
 class RaidRepository:
 
@@ -16,14 +16,21 @@ class RaidRepository:
         
         query = '''
                 INSERT INTO raid
-                (room_id, room_name, user_id, display_name, timestamp, viewer_count)
-                VALUES (?,?,?,?,CURRENT_TIMESTAMP,?)
+                (user_id, room_id, timestamp, tmi_sent_ts, msg_id, source_msg_id, 
+                msg_param_displayName, msg_param_login, msg_param_profileImageURL,
+                 msg_param_viewerCount, system_msg)
+                VALUES (?,?,CURRENT_TIMESTAMP,?,?,?,?,?,?,?,?)
                 '''
-        self.db.execute_query(query, (raid.room_id,
-                                      raid.room_name,
-                                      raid.user_id,
-                                      raid.display_name,
-                                      raid.viewer_count))
+        self.db.execute_query(query, (raid.user_id,
+                                      raid.room_id,
+                                      raid.tmi_sent_ts,
+                                      raid.msg_id,
+                                      raid.source_msg_id,
+                                      raid.msg_param_displayName,
+                                      raid.msg_param_login,
+                                      raid.msg_param_profileImageURL,
+                                      raid.msg_param_viewerCount,
+                                      raid.system_msg))
 
     def exists(self, user_id:str, room_id:str) -> bool:
         """

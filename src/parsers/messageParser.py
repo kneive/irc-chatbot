@@ -16,7 +16,7 @@ class MessageParser(BaseParser):
         tags = {}
 
         try:
-            # find end of tags
+            # find end of tags part
             temp_idx = input.find('user-type=')
             if temp_idx == -1:
                 raise ValueError(f"(parse) PRIVMSG message is corrupted: no 'user-type'.")
@@ -27,6 +27,16 @@ class MessageParser(BaseParser):
 
             raw_tags = self._parseTags(input[1:boundary])
 
+            # check for vip badge
+            if 'vip/1' in input:
+                raw_tags['vip'] = '1'
+            else:
+                raw_tags['vip'] = '0'
+
+            # check for sharedchat
+            if raw_tags.get('source-room-id') is not None:
+                raw_tags['msg-id'] = 'sharedchatnotice'
+
             # find room name
             idx = input.find('#', boundary+2)
             if idx == -1:
@@ -34,18 +44,10 @@ class MessageParser(BaseParser):
         
             raw_tags['room-name'] = input[idx+1: input.find(' ', idx)].strip()
 
-            # find start of message
+            # find start of message part
             idx = input.find(' :', idx)
             if idx == -1:
                 raise ValueError("(parse) PRIVMSG message is corrupted: no ' :' in message part")
-
-            if 'vip/1' in input:
-                raw_tags['vip'] = '1'
-            else:
-                raw_tags['vip'] = '0'
-
-            if raw_tags.get('source-room-id')is not None:
-                raw_tags['msg-id'] = 'sharedchatnotice'
 
             raw_tags['message-content'] = input[idx+2:]
 
@@ -65,31 +67,6 @@ class MessageParser(BaseParser):
             result.is_valid = False
             result.error = str(e)
             return result
-
-    # deprecated
-    def _buildSeparator(self, input:str) -> str:
-        """Build separator for tags and message part"""
-
-        try:
-            start = input.find('display-name=')
-            if start == -1:
-                raise ValueError("PRIVMSG message is corrupted: no 'display-name'")
-            
-            start +=  len('display-name=')
-            end = input.find(';', start)
-            if end == -1:
-                raise ValueError("(_buildSeparator) PRIVMSG message is corrupted: no ';' after display-name")
-            
-            display_name = input[start:end]
-            idx = display_name.find('\s')
-            if idx == -1:
-                return f' :{display_name}'.lower()
-            else:
-                return f' :{display_name[:idx]}'.lower()
-
-
-        except Exception as e:
-            print(f'Error parsing PRIVMSG: {e}')
 
     def _parseTags(self, input:str) -> Dict[str, str]:
         """Parse message tags from input string"""

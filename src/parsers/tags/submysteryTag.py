@@ -1,11 +1,19 @@
-from .baseTag import BaseTag
 from dataclasses import dataclass
+from .baseTag import BaseTag
 
 @dataclass
-class SubmysterygiftTag(BaseTag):
+class SubmysteryTag(BaseTag):
 
-    gift_id:str = 'null'
-    origin_id:str = 'null'
-    sub_plan:str = 'null'
-    mass_gift_count:str = '-1'
-    sender_count:str = '-1'
+    # msg params
+    msg_param_community_gift_id:str
+    msg_param_mass_gift_count:int=-42
+    msg_param_origin_id:str
+    msg_param_sender_count:int=-42
+    msg_param_sub_plan:str
+    msg_param_goal_contribution_type:str
+    msg_param_goal_current_contributions:int=-42
+    msg_param_goal_target_contributions:int=-42
+    msg_param_goal_user_contributions:int=-42
+
+    # general
+    system_msg:str

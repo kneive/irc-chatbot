@@ -3,14 +3,12 @@ from .baseTag import BaseTag
 
 @dataclass
 class PrivmsgTag(BaseTag):
+    
+    message_id:str
+    source_message_id:str
+    first_msg:int=-42
+    returning_chatter:int=-42
+    turbo:int=-42
+    msg_content:str
 
-    reply_parent_msg_id:str = 'null'
-    reply_parent_user_id:str = 'null'
-    reply_parent_display_name:str = 'null'
-
-    reply_thread_parent_user_id:str = 'null'
-    reply_thread_parent_display_name:str = 'null'
-    reply_thread_parent_msg_id:str = 'null'
-
-    # utility
-    message_content:str = 'null'
+    #add reply and thread

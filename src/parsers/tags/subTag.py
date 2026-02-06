@@ -4,17 +4,15 @@ from .baseTag import BaseTag
 @dataclass
 class SubTag(BaseTag):
 
-    months:str = '-1'
-    cumulative_months:str = '-1'
-    multimonth_duration:str = '-1'
-    multimonth_tenure:str = '-1'
-    should_share_streak:str = 'null'
+    # msg params
+    msg_param_cumulative_months:int=-42
+    msg_param_months:int=-42
+    msg_param_multimonth_duration:int=-42
+    msg_param_multimonth_tenure:int=-42
+    msg_param_should_share_streak:int=-42
+    msg_param_sub_plan_name:str
+    msg_param_sub_plan:str
+    msg_param_was_gifted:str
 
-    sub_plan_name:str = 'null'
-    sub_plan:str = 'null'
-    was_gifted:str = '-1'
-
-    #unused (found in resub, gifted=true, anon-gift=true)
-    #msg-param-anon-gift:str = 'null'
-    #msg-param-gift-month-being0redeemed:str = '-1'
-    #msg-param-gift-months:str = '-1'
+    # general
+    system_msg:str

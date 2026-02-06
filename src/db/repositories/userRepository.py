@@ -11,7 +11,7 @@ class UserRepository(Saltmine[User]):
         """Get entry for user_id from user table"""
 
         query = '''
-                SELECT user_id, display_name, username, color, turbo
+                SELECT user_id, login, display_name, user_type, turbo, created
                 FROM user
                 WHERE user_id = ?
                 '''
@@ -19,10 +19,12 @@ class UserRepository(Saltmine[User]):
         
         if entry:
             return User(user_id=entry[0],
-                        display_name=entry[1],
-                        username=entry[2],
-                        color=entry[3],
-                        turbo=entry[4])
+                        login=entry[1],
+                        display_name=entry[2],
+                        username=entry[3],
+                        user_type=entry[4],
+                        turbo=entry[5],
+                        created=entry[6])
         return None
 
     def save(self, user:User) -> None:
@@ -30,13 +32,13 @@ class UserRepository(Saltmine[User]):
 
         query = '''
                 INSERT OR REPLACE INTO user
-                (user_id, display_name, username, color, turbo, added)
+                (user_id, login, display_name, user_type, turbo, created)
                 VALUES (?,?,?,?,?, CURRENT_TIMESTAMP)
                 '''
         self.db.execute_query(query, (user.user_id, 
-                                      user.display_name, 
-                                      user.username, 
-                                      user.color, 
+                                      user.login,
+                                      user.display_name,  
+                                      user.user_type,
                                       user.turbo))
 
     def exists(self, user_id:str) -> bool:
