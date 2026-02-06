@@ -148,7 +148,7 @@ class DatabaseManager:
                     tmi_sent_ts TEXT NOT NULL,
                     msg_id TEXT NOT NULL,
                     source_msg_id TEXT,
-                    community_gift_id TEXT NOT NULL,
+                    community_gift_id TEXT,
                     fun_string TEXT,
                     gift_months INTEGER DEFAULT 0,
                     months INTEGER DEFAULT 0,
