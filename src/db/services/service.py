@@ -297,7 +297,7 @@ class SaltyService:
         # custom check for room and user
 
         self.raid_repo.save(Raid(user_id=data.user_id,
-                                    room_id=data.source_room_id,
+                                    room_id=data.room_id,
                                     tmi_sent_ts=data.tmi_sent_ts,
                                     msg_id=data.msg_id,
                                     source_msg_id=data.source_msg_id,
@@ -352,7 +352,7 @@ class SaltyService:
         else:
             
             self.sub_repo.save(Sub(user_id=data.user_id,
-                                   room_id=data.source_room_id,
+                                   room_id=data.room_id,
                                    tmi_sent_ts=data.tmi_sent_ts,
                                    msg_id=data.msg_id,
                                    source_msg_id=data.source_msg_id,
