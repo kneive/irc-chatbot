@@ -298,6 +298,7 @@ class SaltyService:
 
         self.raid_repo.save(Raid(user_id=data.user_id,
                                     room_id=data.room_id,
+                                    source_room_id=data.source_room_id,
                                     tmi_sent_ts=data.tmi_sent_ts,
                                     msg_id=data.msg_id,
                                     source_msg_id=data.source_msg_id,
@@ -491,8 +492,8 @@ class SaltyService:
         if data.msg_id == 'sharedchatnotice':
 
             # extract substreak
-            if data.get('badges') != '':
-                badges = data.get('badges').split(',')
+            if data.badges:
+                badges = data.badges.split(',')
                 for badge in badges:
                     if badge.startswith('subscriber'):
                         data.sub_streak = int(badge.split('/')[1])
@@ -510,7 +511,13 @@ class SaltyService:
             if not self.room_repo.exists(room_id=data.source_room_id):
 
                 self.room_repo.save(Room(room_id=data.source_room_id,
+                                         room_name=data.source_room_name))
+            
+            if not self.room_repo.exists(room_id=data.room_id):
+                
+                self.room_repo.save(Room(room_id=data.room_id,
                                          room_name=data.room_name))
+
 
             # check whether user exists in user_in_room table
             if not self.userRoom_repo.exists(room_id=data.source_room_id, user_id=data.user_id):

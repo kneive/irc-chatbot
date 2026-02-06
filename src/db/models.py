@@ -85,6 +85,7 @@ class Privmsg:
 class Raid:
     user_id:str | None = None
     room_id:str | None = None
+    source_room_id:str | None = None
     tmi_sent_ts:str | None = None
     msg_id:str | None = None
     source_msg_id:str | None = None

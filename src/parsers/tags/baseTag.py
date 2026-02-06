@@ -6,6 +6,7 @@ class BaseTag:
     # room information
     room_name:str | None = None
     room_id:str | None = None
+    source_room_name:str | None = None
     source_room_id:str | None = None
 
     # user information

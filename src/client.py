@@ -32,7 +32,7 @@ from db.database import DatabaseManager
 PROJECT_ROOT = Path(__file__).parent.parent
 LOGINDATA = PROJECT_ROOT / 'keyz' / 'logins.key'
 CONFIG = PROJECT_ROOT / 'config' / 'config.json'
-LOGFILE = PROJECT_ROOT / 'logs' / 'log.log'
+LOGFILE = PROJECT_ROOT / 'logs' / 'logs'
 
 TOKEN = get_token()
 

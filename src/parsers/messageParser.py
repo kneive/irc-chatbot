@@ -43,6 +43,7 @@ class MessageParser(BaseParser):
                 raise ValueError("(parse) PRIVMSG message is corrupted: no '#' in message part")
         
             raw_tags['room-name'] = input[idx+1: input.find(' ', idx)].strip()
+            raw_tags['source-room-name'] = '#unknown'
 
             # find start of message part
             idx = input.find(' :', idx)
@@ -50,6 +51,10 @@ class MessageParser(BaseParser):
                 raise ValueError("(parse) PRIVMSG message is corrupted: no ' :' in message part")
 
             raw_tags['message-content'] = input[idx+2:]
+
+            # replace \\s
+            if raw_tags.get('reply-parent-msg-body') is not None:
+                raw_tags['reply-parent-msg-body'] = raw_tags.get('reply-parent-msg-body').replace('\s', ' ')
 
             tags = TagFactory.createPrivmsgTag(raw_tags)
 

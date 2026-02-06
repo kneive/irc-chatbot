@@ -1,4 +1,5 @@
 import sqlite3
+import traceback
 from typing import List, Optional
 
 class DatabaseManager:
@@ -106,6 +107,7 @@ class DatabaseManager:
                     serial INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id TEXT REFERENCES user (user_id),
                     room_id TEXT REFERENCES room (room_id),
+                    source_room_id TEXT,
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     tmi_sent_ts TEXT NOT NULL,
                     msg_id TEXT NOT NULL,
@@ -281,8 +283,24 @@ class DatabaseManager:
                 conn.execute("PRAGMA foreign_keys = ON")
                 cursor = conn.execute(query, params)
                 return cursor.fetchone()
+            
+        except sqlite3.IntegrityError as e:
+            # Print detailed error information
+            print(f"Foreign key constraint error!")
+            print(f"Query: {query}")
+            print(f"Params: {params}")
+            print(f"Error: {e}")
+            
+            # Get the last inserted table
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.execute("SELECT sql FROM sqlite_master WHERE type='table'")
+                print(f"Available tables: {[row[0] for row in cursor.fetchall()]}")
+            
+            raise
+
         except Exception as e:
             print(f"Database query error: {e}")
+            print(f'Traceback: {traceback.format_exc()}')
             return None
         
     def execute_query_all(self, query:str, params:tuple=()) -> List[tuple]:
@@ -293,6 +311,22 @@ class DatabaseManager:
                 conn.execute("PRAGMA foreign_keys = ON")
                 cursor = conn.execute(query, params)
                 return cursor.fetchall()
+        
+        except sqlite3.IntegrityError as e:
+            # Print detailed error information
+            print(f"Foreign key constraint error!")
+            print(f"Query: {query}")
+            print(f"Params: {params}")
+            print(f"Error: {e}")
+            
+            # Get the last inserted table
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.execute("SELECT sql FROM sqlite_master WHERE type='table'")
+                print(f"Available tables: {[row[0] for row in cursor.fetchall()]}")
+            
+            raise
+        
         except Exception as e:
             print(f"Database query error: {e}")
+            print(f'Traceback: {traceback.format_exc()}')
             return []
