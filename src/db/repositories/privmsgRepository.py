@@ -17,8 +17,9 @@ class PrivmsgRepository:
                 INSERT INTO privmsg
                 (timestamp, tmi_sent_ts, message_id, source_message_id, room_id, 
                 source_room_id, user_id, color, returning_chatter, first_msg, 
-                flags, emotes, msg_content)
-                VALUES (CURRENT_TIMESTAMP,?,?,?,?,?,?,?,?,?,?,?,?)
+                flags, emotes, msg_content, reply_user_id, reply_msg_id, 
+                reply_msg_body, thread_user_id, thread_msg_id)
+                VALUES (CURRENT_TIMESTAMP,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 '''
         self.db.execute_query(query, (privmsg.tmi_sent_ts,
                                       privmsg.message_id,
@@ -31,7 +32,12 @@ class PrivmsgRepository:
                                       privmsg.first_msg,
                                       privmsg.flags,
                                       privmsg.emotes,
-                                      privmsg.msg_content))
+                                      privmsg.msg_content,
+                                      privmsg.reply_parent_user_id,
+                                      privmsg.reply_parent_msg_id,
+                                      privmsg.reply_parent_msg_body,
+                                      privmsg.reply_thread_parent_user_id,
+                                      privmsg.reply_thread_parent_msg_id))
         
     def exists(self, user_id:str, room_id:str) -> bool:
         """Checks whether a user user_id has ever posted a message in room room_id"""

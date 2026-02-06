@@ -1,7 +1,6 @@
 import requests
 import webbrowser
 import json
-import os
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 from pathlib import Path
@@ -111,6 +110,3 @@ def get_token():
         return token_data['access_token']
     else:
         return None
-
-#if __name__ == '__main__':
-#    get_token()

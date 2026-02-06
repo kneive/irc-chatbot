@@ -1,5 +1,6 @@
 
 from ..repositories import (AnnouncementRepository,
+                            BitsRepository,
                             BitsbadgetierRepository, 
                             OnetapgiftRepository,
                             PaidupgradeRepository,
@@ -15,7 +16,9 @@ from ..repositories import (AnnouncementRepository,
                             UserRoomRepository,
                             UserlistRepository,
                             ViewerMilestoneRepository)
+
 from ..models import (Announcement,
+                      Bits,
                       Bitsbadgetier,
                       Onetapgift,
                       Payforward,
@@ -55,6 +58,7 @@ class SaltyService:
 
     def __init__(self,
                  announcement_repo: AnnouncementRepository,
+                 bits_repo: BitsRepository,
                  bitsbadge_repo: BitsbadgetierRepository,
                  paidupgrade_repo: PaidupgradeRepository,
                  payforward_repo: PayforwardRepository,
@@ -72,6 +76,7 @@ class SaltyService:
                  viewerMilestone_repo: ViewerMilestoneRepository):
         
         self.announcement_repo = announcement_repo
+        self.bits_repo = bits_repo
         self.bitsbadge_repo = bitsbadge_repo
         self.onetap_repo = onetap_repo
         self.paidupgrade_repo = paidupgrade_repo
@@ -119,7 +124,8 @@ class SaltyService:
             self._handlePaidupgrade(parsed.data)
         elif parsed.message_type == 'ONETAPGIFTREDEEMED':
             self._handleOnetapgift(parsed.data)
-        # elif parsed.message_type == 'BITSBADGETIER': no table and repository        
+        elif parsed.message_type == 'BITSBADGETIER':
+            self._handleBitsbadgetier(parsed.data)        
 
 
     def _handleAnnouncement(self, data:AnnouncementTag) -> None:
@@ -140,9 +146,24 @@ class SaltyService:
                                                      msg_content=data.msg_content))
 
 
-    # _handlebitsbadge
+    def _handleBitsbadgetier(self, data:BitsBadgeTierTag) -> None:
+        """Handles BITSBADGETIER messages"""
+
+        self._checkUserRoomUserInRoom(data)
+
+        if data.msg_id == 'sharedchatnotice':
+            self.bitsbadge_repo.save(Bitsbadgetier(room_id=data.source_room_id,
+                                                   user_id=data.user_id,
+                                                   msg_param_threshold=data.msg_param_threshold,
+                                                   system_msg=data.system_msg))
+        else:
+            self.bitsbadge_repo.save(Bitsbadgetier(room_id=data.room_id,
+                                                   user_id=data.user_id,
+                                                   msg_param_threshold=data.msg_param_threshold,
+                                                   system_msg=data.system_msg))
 
     def _handleOnetapgift(self, data:OnetapgiftTag) -> None:
+        """Handles ONETAPGIFTREDEEMED messages"""
 
         self._checkUserRoomUserInRoom(data)
 
@@ -172,6 +193,7 @@ class SaltyService:
 
 
     def _handlePaidupgrade(self, data:PaidupgradeTag) -> None:
+        """Handles PRIMEPAIDUPGRADE and GIFTPAIDUPGRADE messages"""
 
         self._checkUserRoomUserInRoom(data)
 
@@ -200,6 +222,7 @@ class SaltyService:
                                                    system_msg=data.system_msg))
 
     def _handlePayforward(self, data:PayforwardTag) -> None:
+        """Handles COMMUNITYPAYFORWARD and STANDARDPAYFORWARD messages"""
 
         self._checkUserRoomUserInRoom(data)
 
@@ -236,8 +259,18 @@ class SaltyService:
                                                  system_msg=data.system_msg))
 
     def _handlePrivmsg(self, data:PrivmsgTag) -> None:
+        """Handles Priv messages"""
 
         self._checkUserRoomUserInRoom(data)
+
+        self._checkReplyThread(data)
+
+        if data.bits != -42:
+
+            self.bits_repo.save(Bits(user_id=data.user_id,
+                                     room_id=data.room_id,
+                                     source_room_id=data.source_room_id,
+                                     bits=data.bits))
 
         self.privmsg_repo.save(Privmsg(tmi_sent_ts=data.tmi_sent_ts,
                                         message_id=data.message_id,
@@ -250,7 +283,12 @@ class SaltyService:
                                         first_msg=data.first_msg,
                                         flags=data.flags,
                                         emotes=data.emotes,
-                                        msg_content=data.msg_content))
+                                        msg_content=data.msg_content,
+                                        reply_parent_user_id=data.reply_parent_user_id,
+                                        reply_parent_msg_id=data.reply_parent_msg_id,
+                                        reply_parent_msg_body=data.reply_parent_msg_body,
+                                        reply_thread_parent_user_id=data.reply_thread_parent_user_id,
+                                        reply_thread_parent_msg_id=data.reply_thread_parent_msg_id))
 
     def _handleRaid(self, data:RaidTag) -> None:
         """Handles RAID messages"""
@@ -381,37 +419,37 @@ class SaltyService:
 
         if data.msg_id == 'sharedchatnotice':
 
-            self.subgift_repo.save(Submystery(user_id=data.user_id,
-                                              room_id=data.source_room_id,
-                                              tmi_sent_ts=data.tmi_sent_ts,
-                                              msg_id=data.msg_id,
-                                              source_msg_id=data.source_msg_id,
-                                              community_gift_id=data.msg_param_community_gift_id,
-                                              contribution_type=data.msg_param_goal_contribution_type,
-                                              current_contributions=data.msg_param_goal_current_contributions,
-                                              target_contributions=data.msg_param_goal_target_contributions,
-                                              user_contributions=data.msg_param_goal_user_contributions,
-                                              mass_gift_count=data.msg_param_mass_gift_count,
-                                              origin_id=data.msg_param_origin_id,
-                                              sub_plan=data.msg_param_sub_plan,
-                                              system_msg=data.system_msg))
+            self.submystery_repo.save(Submystery(user_id=data.user_id,
+                                                 room_id=data.source_room_id,
+                                                 tmi_sent_ts=data.tmi_sent_ts,
+                                                 msg_id=data.msg_id,
+                                                 source_msg_id=data.source_msg_id,
+                                                 community_gift_id=data.msg_param_community_gift_id,
+                                                 contribution_type=data.msg_param_goal_contribution_type,
+                                                 current_contributions=data.msg_param_goal_current_contributions,
+                                                 target_contributions=data.msg_param_goal_target_contributions,
+                                                 user_contributions=data.msg_param_goal_user_contributions,
+                                                 mass_gift_count=data.msg_param_mass_gift_count,
+                                                 origin_id=data.msg_param_origin_id,
+                                                 sub_plan=data.msg_param_sub_plan,
+                                                 system_msg=data.system_msg))
 
         else:
 
-            self.subgift_repo.save(Submystery(user_id=data.user_id,
-                                              room_id=data.room_id,
-                                              tmi_sent_ts=data.tmi_sent_ts,
-                                              msg_id=data.msg_id,
-                                              source_msg_id=data.source_msg_id,
-                                              community_gift_id=data.msg_param_community_gift_id,
-                                              contribution_type=data.msg_param_goal_contribution_type,
-                                              current_contributions=data.msg_param_goal_current_contributions,
-                                              target_contributions=data.msg_param_goal_target_contributions,
-                                              user_contributions=data.msg_param_goal_user_contributions,
-                                              mass_gift_count=data.msg_param_mass_gift_count,
-                                              origin_id=data.msg_param_origin_id,
-                                              sub_plan=data.msg_param_sub_plan,
-                                              system_msg=data.system_msg))
+            self.submystery_repo.save(Submystery(user_id=data.user_id,
+                                                 room_id=data.room_id,
+                                                 tmi_sent_ts=data.tmi_sent_ts,
+                                                 msg_id=data.msg_id,
+                                                 source_msg_id=data.source_msg_id,
+                                                 community_gift_id=data.msg_param_community_gift_id,
+                                                 contribution_type=data.msg_param_goal_contribution_type,
+                                                 current_contributions=data.msg_param_goal_current_contributions,
+                                                 target_contributions=data.msg_param_goal_target_contributions,
+                                                 user_contributions=data.msg_param_goal_user_contributions,
+                                                 mass_gift_count=data.msg_param_mass_gift_count,
+                                                 origin_id=data.msg_param_origin_id,
+                                                 sub_plan=data.msg_param_sub_plan,
+                                                 system_msg=data.system_msg))
             
 
     def _handleUserlist(self, data:dict) -> None:
@@ -515,3 +553,21 @@ class SaltyService:
                                                  sub_streak=data.sub_streak,
                                                  vip=data.vip,
                                                  mod=data.mod))
+    
+    def _checkReplyThread(self, data:PrivmsgTag) -> None:
+
+        if data.reply_thread_parent_user_id is not None:
+            if not self.user_repo.exists(user_id=data.reply_thread_parent_user_id):
+                self.user_repo.save(User(user_id=data.reply_thread_parent_user_id,
+                                        login=data.reply_thread_parent_user_login,
+                                        display_name=data.reply_thread_parent_display_name,
+                                        user_type=None,
+                                        turbo=-42))
+
+        if data.reply_parent_user_id is not None:    
+            if not self.user_repo.exists(user_id=data.reply_parent_user_id):
+                self.user_repo.save(User(user_id=data.reply_parent_user_id,
+                                         login=data.reply_parent_user_login,
+                                         display_name=data.reply_parent_display_name,
+                                         user_type=None,
+                                         turbo=-42))

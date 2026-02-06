@@ -23,6 +23,17 @@ class DatabaseManager:
             ''')
 
             conn.execute('''
+                CREATE TABLE IF NOT EXISTS bits (
+                    serial INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id TEXT REFERENCES user (user_id),
+                    room_id TEXT REFERENCES room (room_id),
+                    source_room_id TEXT,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    bits INTEGER
+                )
+            ''')
+
+            conn.execute('''
                 CREATE TABLE IF NOT EXISTS bitsbadgetier (
                     serial INTEGER PRIMARY KEY AUTOINCREMENT,
                     room_id TEXT REFERENCES room (room_id),
@@ -62,13 +73,14 @@ class DatabaseManager:
                     subscriber INTEGER DEFAULT 0,
                     sub_streak INTEGER DEFAULT 0,
                     vip INTEGER DEFAULT 0,
-                    mod INTEGER DEFAULT 0)
+                    mod INTEGER DEFAULT 0
+                )
             ''')
 
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS privmsg (
                     serial INTEGER PRIMARY KEY AUTOINCREMENT,
-                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     tmi_sent_ts TEXT NOT NULL,
                     message_id TEXT NOT NULL,
                     source_message_id TEXT,
@@ -80,7 +92,12 @@ class DatabaseManager:
                     first_msg INTEGER DEFAULT 0,
                     flags TEXT DEFAULT '',
                     emotes TEXT DEFAULT '',
-                    msg_content TEXT DEFAULT ''
+                    msg_content TEXT DEFAULT '',
+                    reply_user_id TEXT REFERENCES user (user_id),
+                    reply_msg_id TEXT,
+                    reply_msg_body TEXT,
+                    thread_user_id TEXT REFERENCES user (user_id),
+                    thread_msg_id TEXT
                 )
             ''')
 

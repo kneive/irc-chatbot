@@ -9,6 +9,7 @@ from auth import get_token
 from pathlib import Path
 from parsers.parser import Saltshaker
 from db.repositories import (AnnouncementRepository,
+                             BitsRepository,
                              BitsbadgetierRepository, 
                              OnetapgiftRepository,
                              PaidupgradeRepository,
@@ -62,6 +63,7 @@ class IRCClient:
 
         db_manager = DatabaseManager('saltmine.db')
         announcement_repo = AnnouncementRepository(db_manager)
+        bits_repo = BitsRepository(db_manager)
         bitsbadge_repo = BitsbadgetierRepository(db_manager)
         onetap_repo = OnetapgiftRepository(db_manager)
         paidupgrade_repo = PaidupgradeRepository(db_manager)
@@ -79,6 +81,7 @@ class IRCClient:
         viewerMilestone_repo = ViewerMilestoneRepository(db_manager)
 
         self.service = SaltyService(announcement_repo=announcement_repo,
+                                    bits_repo=bits_repo,
                                     bitsbadge_repo=bitsbadge_repo,
                                     onetap_repo=onetap_repo,
                                     paidupgrade_repo=paidupgrade_repo,

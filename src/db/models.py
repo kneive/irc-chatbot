@@ -8,6 +8,13 @@ class Announcement:
     msg_content:str | None = None
 
 @dataclass
+class Bits:
+    user_id:str | None = None
+    room_id:str | None = None
+    source_room_id:str | None = None
+    bits:int= -42
+
+@dataclass
 class Bitsbadgetier:
     room_id:str | None = None
     user_id:str | None = None
@@ -68,6 +75,11 @@ class Privmsg:
     flags:str | None = None
     emotes:str | None = None
     msg_content:str | None = None
+    reply_parent_msg_body:str | None = None
+    reply_parent_msg_id:str | None = None
+    reply_parent_user_id:str | None = None
+    reply_thread_parent_msg_id:str | None = None
+    reply_thread_parent_user_id:str | None = None
 
 @dataclass
 class Raid:

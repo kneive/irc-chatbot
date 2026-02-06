@@ -1,4 +1,5 @@
 from .announcementRepository import AnnouncementRepository
+from .bitsRepository import BitsRepository
 from .bitsbadgetierRepository import BitsbadgetierRepository
 from .onetapgiftRepository import OnetapgiftRepository
 from .paidupgradeRepository import PaidupgradeRepository
@@ -17,6 +18,7 @@ from .viewermilestoneRepository import ViewerMilestoneRepository
 
 __all__ = [
     'AnnouncementRepository',
+    'BitsRepository',
     'BitsbadgetierRepository',
     'OnetapgiftRepository',
     'PaidupgradeRepository',

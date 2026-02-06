@@ -220,7 +220,17 @@ class TagFactory:
                           first_msg=int(raw_tags.get('first-msg', '0')),
                           returning_chatter=int(raw_tags.get('returning-chatter', '0')),
                           turbo=int(raw_tags.get('turbo', '0')),
-                          msg_content=raw_tags.get('message-content'))
+                          msg_content=raw_tags.get('message-content'),
+                          bits=int(raw_tags.get('bits', '-42')),
+                          reply_parent_display_name=raw_tags.get('reply-parent-display-name', None),
+                          reply_parent_msg_body=raw_tags.get('reply-parent-msg-body', None),
+                          reply_parent_msg_id=raw_tags.get('reply-parent-msg-id', None),
+                          reply_parent_user_id=raw_tags.get('reply-parent-user-id', None),
+                          reply_parent_user_login=raw_tags.get('reply-parent-user-login', None),
+                          reply_thread_parent_display_name=raw_tags.get('reply-thread-parent-display-name', None),
+                          reply_thread_parent_msg_id=raw_tags.get('reply-thread-parent-msg-id', None),
+                          reply_thread_parent_user_id=raw_tags.get('reply-thread-parent-user-id', None),
+                          reply_thread_parent_user_login=raw_tags.get('reply-thread-parent-user-login', None))
     
     @staticmethod
     def createRaidTag(raw_tags:dict) -> RaidTag:
@@ -325,7 +335,7 @@ class TagFactory:
                           msg_param_gift_months=int(raw_tags.get('msg-param-gift-months')),
                           msg_param_months=int(raw_tags.get('msg-param-months')),
                           msg_param_origin_id=raw_tags.get('msg-param-origin-id'),
-                          msg_param_recipient_displayu_name=raw_tags.get('msg-param-recipient-display-name'),
+                          msg_param_recipient_display_name=raw_tags.get('msg-param-recipient-display-name'),
                           msg_param_recipient_id=raw_tags.get('msg-param-recipient-id'),
                           msg_param_recipient_user_name=raw_tags.get('msg-param-recipient-user-name'),
                           msg_param_sender_count=int(raw_tags.get('msg-param-sender-count')),
