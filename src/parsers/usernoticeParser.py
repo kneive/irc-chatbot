@@ -33,7 +33,7 @@ class UsernoticeParser(BaseParser):
 
             if (raw_tags.get('msg-id') == 'sharedchatnotice' and
                 raw_tags.get('room-id') != raw_tags.get('source-room-id')):
-                raw_tags['room-name'] = input[message_start+2:].strip()
+                raw_tags['room-name'] = input[idx_start+1:].strip()
                 raw_tags['source-room-name'] = '#unknown'
             else:
                 if idx_end == -1:
