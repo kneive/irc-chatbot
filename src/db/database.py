@@ -278,6 +278,7 @@ class DatabaseManager:
 
         try:
             with sqlite3.connect(self.db_path) as conn:
+                conn.execute("PRAGMA foreign_keys = ON")
                 cursor = conn.execute(query, params)
                 return cursor.fetchone()
         except Exception as e:
@@ -289,6 +290,7 @@ class DatabaseManager:
 
         try:
             with sqlite3.connect(self.db_path) as conn:
+                conn.execute("PRAGMA foreign_keys = ON")
                 cursor = conn.execute(query, params)
                 return cursor.fetchall()
         except Exception as e:
