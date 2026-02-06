@@ -275,7 +275,7 @@ class SaltyService:
         self.privmsg_repo.save(Privmsg(tmi_sent_ts=data.tmi_sent_ts,
                                         message_id=data.message_id,
                                         source_message_id=data.source_message_id,
-                                        room_id=data.source_room_id,
+                                        room_id=data.room_id,
                                         source_room_id=data.source_room_id,
                                         user_id=data.user_id,
                                         color=data.color,
