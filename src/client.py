@@ -140,6 +140,9 @@ class IRCClient:
         """Attempt to reconnect to server"""
         print(f'[{time.strftime("%Y-%m-%d %H:%M:%S")}] Attempting to reconnect...')
 
+        # new Token
+        self.token = get_token()
+
         if self.connect():
             print(f'[{time.strftime("%Y-%m-%d %H:%M:%S")}] Connection successful.')
 
