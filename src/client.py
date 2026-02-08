@@ -124,6 +124,7 @@ class IRCClient:
                 self.socket = raw_socket
             
             self.socket.connect((self.server, self.port))
+            self.socket.settimeout(30.0)
             self.connected = True
             self.reconnect_attempts = 0
             self.last_ping_time = time.time()
@@ -140,21 +141,32 @@ class IRCClient:
         """Attempt to reconnect to server"""
         print(f'[{time.strftime("%Y-%m-%d %H:%M:%S")}] Attempting to reconnect...')
 
-        # new Token
-        self.token = get_token()
-
         if self.connect():
             print(f'[{time.strftime("%Y-%m-%d %H:%M:%S")}] Connection successful.')
+
+            # new Token
+            new_token = get_token()
+            if not new_token:
+                print(f'[{time.strftime("%Y-%m-%d %H:%M:%S")}] ERROR: failed to get token.')
+                return False
+
+            new_token = new_token.strip()
+
+            self.token = new_token if new_token.startswith('oauth:') else f'oauth:{new_token}'
 
             self.login()
             self.request_capabilities(tags=True, commands=True, membership=True)
 
-            time.sleep(1)
+            print(self.receive_banner())
 
             if self.channels_joined:
-                for channel in self.channels_joined:
+                for i, channel in enumerate(self.channels_joined):
                     self.join_channel(channel)
-                    time.sleep(0.5)
+                    time.sleep(1)
+
+                    # rate limits 10 channels per 10 seconds
+                    if (i+1) % 10 == 0: 
+                        time.sleep(1)
 
             return True
         else:
@@ -244,7 +256,7 @@ class IRCClient:
 
                 data = self.socket.recv(4096)
                 if not data:
-                    print(f'[{time.strftime("%Y-%m-%d %H:%M:%S")}]Disconnected by server')
+                    print(f'[{time.strftime("%Y-%m-%d %H:%M:%S")}] Disconnected by server')
                     self.connected = False
                     continue
                 
@@ -294,16 +306,11 @@ class IRCClient:
     def parse_line(self, line):
         """Parse a single line received from theroomstate server"""
         
-        #output raw line
-        #print(line)
-
-        # log raw line
-        #if self.log_handle:
-        #    self.log_handle.write(line + '\n')
-        #    self.log_handle.flush()
+        # _debug(line)
 
         # keep alive
         if line.startswith('PING'):
+            print(f'[{time.strftime("%Y-%m-%d %H:%M:%S")}] PING')
             self.last_ping_time = time.time()
             payload = line.split(' ', 1)[1] if ' ' in line else ':tmi.twitch.tv'
             self.send_raw(f'PONG {payload}')
@@ -366,6 +373,14 @@ class IRCClient:
                 print(f"Reconnect attempts: {self.reconnect_attempts}")
                 print(f"{'='*50}\n")
             
+            elif command.lower() == 'disconnect':
+                print(f'[{time.strftime("%Y-%m-%d %H:%M:%S")}] Test: Disconnect')
+                self.connected = False
+                try:
+                    self.socket.close()
+                except:
+                    pass
+
             else:
                 # send raw message
                 self.send_raw(command)
@@ -395,6 +410,16 @@ class IRCClient:
 
                 self.log_handle = None
             print(f'[{time.strftime("%Y-%m-%d %H:%M:%S")}] Disconnected')
+
+    def _debug(self, line:str):
+    
+        # output raw line to console
+        print(line)
+
+        # log raw line to file
+        if self.log_handle:
+            self.log_handle.write(line + '\n')
+            self.log_handle.flush()
 
 def read_config():
         """Read configuration from config.json"""
