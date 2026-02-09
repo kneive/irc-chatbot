@@ -15,8 +15,7 @@ class RoomRepository(Saltmine[Room]):
         """Get all entries for a given name. We always return the first entry."""
 
         query = 'SELECT room_id FROM room WHERE room_name = ?'
-        cursor = self.db.execute_query(query, (room_name,))
-        entries = cursor.fetchall()
+        entries = self.db.execute_query(query, (room_name,))
         return entries[0]
 
     def save(self, room:Room) -> None:

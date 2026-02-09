@@ -21,10 +21,9 @@ class UserRepository(Saltmine[User]):
             return User(user_id=entry[0],
                         login=entry[1],
                         display_name=entry[2],
-                        username=entry[3],
-                        user_type=entry[4],
-                        turbo=entry[5],
-                        created=entry[6])
+                        user_type=entry[3],
+                        turbo=entry[4],
+                        created=entry[5])
         return None
 
     def save(self, user:User) -> None:

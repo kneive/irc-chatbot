@@ -118,9 +118,9 @@ class SaltyService:
             self._handleRoomstate(parsed.data)
         elif parsed.message_type == 'RAID':
             self._handleRaid(parsed.data)
-        elif parsed.message_type == ['COMMUNITYPAYFORWARD', 'STANDARDPAYFORWARD']:
+        elif parsed.message_type in ['COMMUNITYPAYFORWARD', 'STANDARDPAYFORWARD']:
             self._handlePayforward(parsed.data)
-        elif parsed.message_type == ['PRIMEPAIDUPGRADE', 'GIFTPAIDUPGRADE']:
+        elif parsed.message_type in ['PRIMEPAIDUPGRADE', 'GIFTPAIDUPGRADE']:
             self._handlePaidupgrade(parsed.data)
         elif parsed.message_type == 'ONETAPGIFTREDEEMED':
             self._handleOnetapgift(parsed.data)

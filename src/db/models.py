@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 
 @dataclass
 class Announcement:
@@ -102,6 +103,7 @@ class Room:
 
 @dataclass
 class Roomstate:
+    timestamp:datetime | None = None
     room_id:str | None = None
     emote_only:int=-42
     followers_only:int=-42
@@ -171,6 +173,7 @@ class User:
     display_name:str | None = None
     user_type:str | None = None
     turbo:int=-42
+    created: datetime | None = None
 
 @dataclass
 class Userlist:

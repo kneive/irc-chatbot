@@ -82,13 +82,13 @@ class UsernoticeParser(BaseParser):
                     tags = TagFactory.createStandardPayForwardTag(raw_tags)
                     usernotice='STANDARDPAYFORWARD'
                 elif raw_tags.get('source-msg-id') == 'communitypayforward':
-                    tags = TagFactory.createCommunityPayForwardTag(raw_tags)
+                    tags = TagFactory.createCommunityPayforwardTag(raw_tags)
                     usernotice='COMMUNITYPAYFORWARD'
                 elif raw_tags.get('source-msg-id') == 'primepaidupgrade':
                     tags = TagFactory.createPrimePaidUpgradeTag(raw_tags)
                     usernotice='PRIMEPAIDUPGRADE'
                 elif raw_tags.get('source-msg-id') == 'giftpaidupgrade':
-                    tags = TagFactory.createGiftPaidUpgradeTag(raw_tags)
+                    tags = TagFactory.createGiftPaidupgradeTag(raw_tags)
                     usernotice='GIFTPAIDUPGRADE'
                 elif raw_tags.get('source-msg-id') == 'onetapgiftredeemed':
                     tags = TagFactory.createOneTapGiftRedeemedTag(raw_tags)
@@ -120,13 +120,13 @@ class UsernoticeParser(BaseParser):
                     tags = TagFactory.createStandardPayForwardTag(raw_tags)
                     usernotice='STANDARDPAYFORWARD'
                 elif raw_tags.get('msg-id') == 'communitypayforward':
-                    tags = TagFactory.createCommunityPayForwardTag(raw_tags)
+                    tags = TagFactory.createCommunityPayforwardTag(raw_tags)
                     usernotice='COMMUNITYPAYFORWARD'
                 elif raw_tags.get('msg-id') == 'primepaidupgrade':
                     tags = TagFactory.createPrimePaidUpgradeTag(raw_tags)
                     usernotice='PRIMEPAIDUPGRADE'
                 elif raw_tags.get('msg-id') == 'giftpaidupgrade':
-                    tags = TagFactory.createGiftPaidUpgradeTag(raw_tags)
+                    tags = TagFactory.createGiftPaidupgradeTag(raw_tags)
                     usernotice='GIFTPAIDUPGRADE'
                 elif raw_tags.get('msg-id') == 'onetapgiftredeemed':
                     tags = TagFactory.createOneTapGiftRedeemedTag(raw_tags)

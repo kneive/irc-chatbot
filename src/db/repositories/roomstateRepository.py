@@ -25,7 +25,7 @@ class RoomStateRepository:
                              emote_only=entry[2],
                              followers_only=entry[3],
                              r9k=entry[4],
-                             slow=entry[5],
+                             slow_mode=entry[5],
                              sub_only=entry[6])
         return None
 
@@ -36,14 +36,14 @@ class RoomStateRepository:
                 INSERT OR REPLACE INTO roomstate
                 (timestamp, room_id, emote_only, followers_only, r9k, slow, 
                 subs_only)
-                VALUES (?,CURRENT_TIMESTAMP,?,?,?,?,?)
+                VALUES (CURRENT_TIMESTAMP,?,?,?,?,?,?)
                 '''
         self.db.execute_query(query, (roomstate.room_id,
-                                      roomstate.followers_only,
-                                      roomstate.sub_only,
                                       roomstate.emote_only,
+                                      roomstate.followers_only,
+                                      roomstate.r9k,
                                       roomstate.slow_mode,
-                                      roomstate.r9k))
+                                      roomstate.sub_only))
 
     def exists(self, room_id:str) -> bool:
         """Check whether room_id exists in roomstate table"""
