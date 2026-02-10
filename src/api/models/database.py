@@ -1,6 +1,7 @@
 import sqlite3
 from flask import g, current_app
 from typing import Any, Dict, List, Optional
+from datetime import datetime
 
 def get_db():
     """
@@ -74,3 +75,27 @@ def init_app(app):
     Register database functions with Flask app. Ensures close_db() is called after each request.
     """
     app.teardown_appcontext(close_db)
+
+
+# utility functions
+def get_user_by_id(user_id:str) -> Optional[Dict]:
+    """Get user by id"""
+    return query_db(
+        'SELECT * FROM user WHERE user_id = ?', (user_id,), one=True
+    )
+
+def get_room_by_id(room_id:str) -> Optional[Dict]:
+    """Get room by id"""
+    return query_db(
+        'SELECT * FROM room WHERE room_id = ?', (room_id,), one=True
+    )
+
+def get_user_display_name(user_id:str) -> Optional[str]:
+    """Get user's display name by user_id"""
+    user = get_user_by_id(user_id)
+    return user['display_name'] if user else None
+
+def get_room_name(room_id:str) -> Optional[str]:
+    """Get room name by room_id"""
+    room = get_room_by_id(room_id)
+    return room['room_name'] if room else None

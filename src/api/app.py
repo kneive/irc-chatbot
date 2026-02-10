@@ -15,11 +15,14 @@ def home():
     """
     return jsonify({
         'message': 'Saltmine API is running',
-        'version': '1.0.0',
+        'version': '1.0.1',
         'endpoints':{
-            'privmsg': '/api/privmsg',
+            'messages': '/api/messages',
             'users': '/api/users',
-            'health': '/api/health'
+            'health': '/api/health',
+            'user stats': '/api/users/<user_id>',
+            'user activity': '/api/users/<user_id>/activity'
+
         }
     })
 

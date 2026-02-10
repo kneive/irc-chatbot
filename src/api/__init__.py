@@ -27,8 +27,9 @@ def create_app(config=None):
     database.init_app(app)
 
     # register blueprints
-    from .routes import privmsg
-    app.register_blueprint(privmsg.msg_blueprint)
+    from .routes import messages, users
+    app.register_blueprint(messages.msg_blueprint)
+    app.register_blueprint(users.users_blueprint)
 
     # root endpoint
 
@@ -36,11 +37,14 @@ def create_app(config=None):
     def home():
         return {
             'message':'Saltmine API',
-            'version': '1.0.0',
+            'version': '1.0.1',
             'endpoints': {
-                'privmsg': '/api/privmsg',
-                'privmsg_stats': '/api/privmsg/stats',
-                'search': '/api/privmsg/search',
+                'messages': '/api/messages',
+                'message stats': '/api/messages/stats',
+                'search': '/api/messages/search',
+                'users': '/api/users',
+                'user stats': '/api/users/<user_id>',
+                'user activity': '/api/users/<user_id>/activity'
             }
         }
     
