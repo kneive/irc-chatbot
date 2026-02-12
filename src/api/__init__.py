@@ -27,9 +27,11 @@ def create_app(config=None):
     database.init_app(app)
 
     # register blueprints
-    from .routes import messages, users
+    from .routes import messages, users, rooms, stats
     app.register_blueprint(messages.msg_blueprint)
     app.register_blueprint(users.users_blueprint)
+    app.register_blueprint(rooms.rooms_blueprint)
+    app.register_blueprint(stats.stats_bluepint)
 
     # root endpoint
 
