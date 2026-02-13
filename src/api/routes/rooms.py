@@ -29,7 +29,7 @@ def get_rooms():
         'count':len(rooms)
     }), 200
 
-@rooms_blueprint.route('/<rom_id>', methods=['GET'])
+@rooms_blueprint.route('/<room_id>', methods=['GET'])
 def get_room(room_id):
     """
     GET /api/rooms/<room_id>

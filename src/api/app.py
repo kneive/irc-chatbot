@@ -34,6 +34,18 @@ def health():
 
     return jsonify({'status': 'ok'}), 200
 
+@app.errorhandler(400)
+def bad_request(error):
+    """
+    Handles 400 errors
+    """
+    return jsonify({
+        'error': 'Bad request',
+        'message': 'The request was invalid or malformed',
+        'status': 400
+    }), 400
+
+
 @app.errorhandler(404)
 def not_found(error):
     """
