@@ -15,6 +15,7 @@ def create_app(config=None):
     app.config.from_mapping(
         DATABASE=DB_PATH,
         JSON_SORT_KEYS=False,
+        JSONIFY_PRETTYPRINT_REGULAR=True
     )
 
     # applies custom config if provided
@@ -39,14 +40,31 @@ def create_app(config=None):
     def home():
         return {
             'message':'Saltmine API',
-            'version': '1.0.1',
+            'version': '1.0.0',
             'endpoints': {
-                'messages': '/api/messages',
-                'message stats': '/api/messages/stats',
-                'search': '/api/messages/search',
-                'users': '/api/users',
-                'user stats': '/api/users/<user_id>',
-                'user activity': '/api/users/<user_id>/activity'
+                'messages': { 
+                    'list':'GET /api/messages',
+                    'get_one': 'GET /api/messages/<serial>',
+                    'statistics': 'GET /api/messages/stats',
+                    'thread': 'GET /api/messages/thread/<msg_id>',
+                    'search': 'GET /api/messages/search?query='
+                },
+                'users': {
+                    'list': 'GET /api/users',
+                    'get_one': 'GET /api/users/<user_id>',
+                    'activity': 'GET /api/users/<user_id>/activity'
+                },
+                'rooms': {
+                    'list': 'GET /api/rooms',
+                    'get_one': 'GET /api/rooms/<room_id>',
+                    'timeline': 'GET /api/rooms/<room_id>/timeline'
+                },
+                'stats': {
+                    'overview': 'GET /api/stats/overview',
+                    'subscriptions': 'GET /api/stats/subscriptions',
+                    'bits': 'GET /api/stats/bits',
+                    'raids': 'GET /api/stats/raids'
+                }
             }
         }
     
