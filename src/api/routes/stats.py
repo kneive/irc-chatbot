@@ -33,7 +33,7 @@ def get_overview():
             'messages': total_messages['count'],
             'users':total_users['count'],
             'rooms':total_rooms['count'],
-            'subscriptions':total_subs['subs'],
+            'subscriptions':total_subs['count'],
             'subgifts':total_subgifts['count'],
             'bits':total_bits['total'],
             'raids':total_raids['count']
@@ -139,7 +139,7 @@ def get_bits_stats():
                             SELECT
                                 b.room_id,
                                 r.room_name,
-                                SUM(b.bits) as total_bits
+                                SUM(b.bits) as total_bits,
                                 COUNT(*) as cheer_count
                             FROM bits b
                             LEFT JOIN room r ON  b.room_id = r.room_id

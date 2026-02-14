@@ -156,8 +156,8 @@ def get_message_stats():
             "messages_by_day_of_week":
     """
 
-    room_id = request.args.get('room_id', Default=None, type=str)
-    user_id = request.args.get('user_id', Default=None, type=str)
+    room_id = request.args.get('room_id', default=None, type=str)
+    user_id = request.args.get('user_id', default=None, type=str)
 
     conditions = ''
     params = []

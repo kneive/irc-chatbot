@@ -32,7 +32,7 @@ def create_app(config=None):
     app.register_blueprint(messages.msg_blueprint)
     app.register_blueprint(users.users_blueprint)
     app.register_blueprint(rooms.rooms_blueprint)
-    app.register_blueprint(stats.stats_bluepint)
+    app.register_blueprint(stats.stats_blueprint)
 
     # root endpoint
 

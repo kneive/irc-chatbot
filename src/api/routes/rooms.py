@@ -3,7 +3,7 @@ from ..models.database import query_db
 
 rooms_blueprint = Blueprint('rooms', __name__, url_prefix='/api/rooms')
 
-@rooms_blueprint('/', methods=['GET'])
+@rooms_blueprint.route('/', methods=['GET'])
 def get_rooms():
     """
     GET /api/rooms
@@ -102,7 +102,7 @@ def get_room(room_id):
         'activity_by_hour': activity_by_hour
     }), 200
 
-@rooms_blueprint.rout('/<room_id>/timeline', methods=['GET'])
+@rooms_blueprint.route('/<room_id>/timeline', methods=['GET'])
 def get_room_timeline(room_id):
     """
     GET /api/rooms/<room_id>/timeline
