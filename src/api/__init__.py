@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from .models import database
 from pathlib import Path
@@ -34,6 +34,33 @@ def create_app(config=None):
     app.register_blueprint(rooms.rooms_blueprint)
     app.register_blueprint(stats.stats_blueprint)
 
+    #####
+
+    @app.route('/api/entries', methods=['GET'])
+    def get_entries():
+        entries = [
+            {'type': 'info', 'text': 'Database connected', 'timestamp': '2024-06-01T12:00:00Z'},
+            {'type': 'result', 'text': 'SELECT * FROM users returned 5 rows', 'timestamp': '2024-06-01T12:01:00Z'}
+        ]
+        return jsonify(entries), 200
+
+    @app.route('/api/query', methods=['POST'])
+    def execute_query():
+        data=request.json
+        query = data.get('query', '')
+        try:
+            # Mock response
+            result = {
+                'success': True,
+                'rows': [{'id': 1, 'name': 'Example'}],
+                'rowCount': 1
+            }
+            return jsonify(result), 200
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 400
+    
+    #####
+
     # root endpoint
 
     @app.route('/')
@@ -67,5 +94,47 @@ def create_app(config=None):
                 }
             }
         }
-    
+
+    @app.route('/api/health')
+    def health():
+        """
+        Health check endpoint
+        """
+
+        return jsonify({'status': 'ok'}), 200
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        """
+        Handles 400 errors
+        """
+        return jsonify({
+            'error': 'Bad request',
+            'message': 'The request was invalid or malformed',
+            'status': 400
+        }), 400
+
+
+    @app.errorhandler(404)
+    def not_found(error):
+        """
+        Handles 404 errors
+        """
+        return jsonify({
+            'error': 'Not found',
+            'message': 'The requested resource does not exist'
+        }), 404
+
+    @app.errorhandler(500)
+    def internal_error(error):
+        """
+        Handles 500 (server) errors 
+        """
+
+        return jsonify({
+            'error': 'Internal server error',
+            'message': 'Something went wrong server-side'
+        }), 500
+
+
     return app
