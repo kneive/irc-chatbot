@@ -65,6 +65,24 @@ def get_users():
         'offset': offset
     }), 200
 
+#####
+
+@users_blueprint.route('/all', methods=['GET'])
+def get_all_users():
+    """
+    Get /api/users/all
+
+    Get a list of all known users
+    """
+
+    users = query_db('SELECT display_name FROM user ORDER BY display_name ASC')
+
+    return jsonify({
+        'users': users
+    }), 200
+
+#####
+
 @users_blueprint.route('/<user_id>', methods=['GET'])
 def get_user(user_id):
     """

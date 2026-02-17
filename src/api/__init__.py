@@ -79,7 +79,8 @@ def create_app(config=None):
                 'users': {
                     'list': 'GET /api/users',
                     'get_one': 'GET /api/users/<user_id>',
-                    'activity': 'GET /api/users/<user_id>/activity'
+                    'activity': 'GET /api/users/<user_id>/activity',
+                    'all': 'GET /api/users/all'
                 },
                 'rooms': {
                     'list': 'GET /api/rooms',
