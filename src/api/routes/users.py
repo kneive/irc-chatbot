@@ -75,13 +75,17 @@ def get_all_users():
     Get a list of all known users
     """
 
-    users = query_db('SELECT display_name FROM user ORDER BY display_name ASC')
+    users = query_db('SELECT display_name, user_id FROM user ORDER BY display_name ASC')
 
     return jsonify({
         'users': users
     }), 200
 
 #####
+
+@users_blueprint.route('/user', methods=['GET'])
+def get_user_by_name():
+    pass
 
 @users_blueprint.route('/<user_id>', methods=['GET'])
 def get_user(user_id):

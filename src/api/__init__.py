@@ -1,3 +1,4 @@
+from .routes.old_routes import messages, rooms
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from .models import database
@@ -28,7 +29,7 @@ def create_app(config=None):
     database.init_app(app)
 
     # register blueprints
-    from .routes import messages, users, rooms, stats
+    from .routes import users, stats
     app.register_blueprint(messages.msg_blueprint)
     app.register_blueprint(users.users_blueprint)
     app.register_blueprint(rooms.rooms_blueprint)

@@ -6,6 +6,7 @@ __pycache__/
 
 # old code
 old/
+old_routes/
 
 # config files
 config.json
