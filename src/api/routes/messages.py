@@ -1,191 +1,112 @@
 from flask import Blueprint, jsonify, request
 from ..models.database import query_db
+from datetime import datetime
 
 msg_blueprint = Blueprint('messages', __name__, url_prefix='/api/messages')
 
-@msg_blueprint.route('/user_name/all', methods=['GET'])
-def get_all_messages_for_user_by_name(user_name):
+@msg_blueprint.route('/', methods=['GET'])
+def get_messages():
     """
-    GET /api/messages/user_name/all
+    GET /api/messages
     """
 
-    messages = query_db('''
-                        SELECT 
-                            u.display_name,
-                            r.room_name,
-                            m.msg_content,
-                            m.reply_msg_body,
-                            m.timestamp
-                        FROM privmsg m
-                        JOIN user u ON m.user_id = u.user_id
-                        JOIN room r ON m.room_id = r.room_id
-                        WHERE u.display_name = ?
-                        ORDER BY m.timestamp DESC
-                        ''', (user_name, room_name))
+    user_name = request.args.get('user-name', default=None, type=str)
+    user_id = request.args.get('user-id', default=None, type=int)
+    room_name = request.args.get('room-name', default=None, type=str)
+    room_id = request.args.get('room-id', default=None, type=int)
+    start_date = request.args.get('start-date', default=None, type=str)
+    end_date = request.args.get('end-date', default=None, type=str)
+    #all = request.args.get('all', default=False, type=bool)
     
-    if messages is None:
+    try:
+        query = '''
+                SELECT
+                    u.display_name,
+                    r.room_name,
+                    m.msg_content,
+                    m.reply_msg_body,
+                    m.timestamp
+                FROM privmsg m
+                JOIN user u ON m.user_id = u.user_id
+                JOIN room r ON m.room_id = r.room_id
+                WHERE 1=1
+                '''
+
+        params = []
+
+        if user_name is not None:
+            query += ' AND u.display_name = ?'
+            params.append(user_name)
+
+        elif user_id is not None:
+            query += ' AND u.user_id = ?'
+            params.append(user_id)
+
+        if room_name is not None:
+            query += ' AND r.room_name = ?'
+            params.append(room_name)
+
+        elif room_id is not None:
+            query += ' AND r.room_id = ?'
+            params.append(room_id)
+
+        if start_date is not None:
+            parsed_date = _parse_date(start_date)
+            query += ' AND m.timestamp >= ?'
+            params.append(parsed_date)        
+
+        if end_date is not None:
+            parsed_date = _parse_date(end_date, end_of_day=True)
+            query += ' AND m.timestamp <= ?'
+            params.append(parsed_date)
+
+        query += ' ORDER BY m.timestamp DESC'
+
+        messages = query_db(query, tuple(params))
+
         return jsonify({
-            'error': 'Not found',
-            'message': f'No messages found for user {user_name}.'
-        }), 404
-    
-    return jsonify({
-        'messages': messages,
-        'count': len(messages)
-    })
+            'messages': messages,
+            'count': len(messages)
+        }), 200
 
-@msg_blueprint.route('/<int:user_id>/all', methods=['GET'])
-def get_all_messages_for_user_by_id(user_id):
-    """
-    GET /api/messages/<user_id>/all
-    """
-
-    messages = query_db('''
-                        SELECT
-                            u.display_name,
-                            r.room_name,
-                            m.msg_content,
-                            m.reply_msg_body,
-                            m.timestamp
-                        FROM privmsg m
-                        JOIN user u ON m.user_id = u.user_id
-                        JOIN room r ON m.room_id = r.room_id
-                        WHERE u.user_id = ?
-                        ORDER BY m.timestamp DESC
-                        ''', (user_id, room_name))
-    
-    if messages is None:
+    except ValueError as e:
         return jsonify({
-            'error': 'Not found',
-            'message': f'No messages found for user ID {user_id}.'
-        }), 404
-    
-    return jsonify({
-        'messages': messages,
-        'count': len(messages)
-    })
+            'error': str(e)
+        }), 400
+        
 
-@msg_blueprint.route('/room_name/all/user_name', methods=['GET'])
-def get_all_messages_room_name_user_name(room_name, user_name):
+def _parse_date(date_string, end_of_day=False):
     """
-    GET /api/messages/room_name/all/user_name)
+    utility for parsing date strings into YYYY-MM-DD format.
+    
+    :param date_str: date string to parse into YYYY-MM-DD format
+    :param end_of_day: flag for setting time to 00:00:00 (False) or 23:59:59 (True)
     """
 
-    messages = query_db('''
-                        SELECT
-                            u.display_name,
-                            r.room_name,
-                            m.msg_content,
-                            m.reply_msg_body,
-                            m.timestamp
-                        FROM privmsg m
-                        JOIN user u ON m.user_id = u.user_id
-                        JOIN room r ON m.room_id = r.room_id
-                        WHERE r.room_name = ? AND u.display_name = ?
-                        ORDER BY m.timestamp DESC
-                        ''', (room_name, user_name))
+    if not date_string:
+        return None
     
-    if messages is None:
-        return jsonify({
-            'error': 'Not found',
-            'message': f'No messages found for user {user_name} in room {room_name}'
-        }), 404
-    
-    return jsonify({
-        'messages': messages,
-        'count': len(messages)
-    }), 200
+    formats = [
+        '%d.%m.%Y',
+        '%d/%m/%Y',
+        '%d-%m-%Y',
+        '%m.%d.%Y',
+        '%m/%d/%Y',
+        '%m-%d-%Y',
+        '%Y.%m.%d',
+        '%Y/%m/%d',
+        '%Y-%m-%d',
+    ]
 
-@msg_blueprint.route('/room_name/all/<int:user_id>', methods=['GET'])
-def get_all_messages_room_name_user_id(room_name, user_id):
-    """
-    GET /api/messages/room_name/all/<user_id>
-    """
+    for fmt in formats:
+        try:
+            parsed = datetime.strptime(date_string, fmt)
+            if end_of_day:
+                parsed = parsed.replace(hour=23, minute=59, second=59)
+            else:
+                parsed = parsed.replace(hour=0, minute=0, second=0)
+            return parsed.isoformat()
+        except ValueError:
+            continue
 
-    messages = query_db('''
-                        SELECT
-                            u.display_name,
-                            r.room_name,
-                            m.msg_content,
-                            m.reply_msg_body,
-                            m.timestamp
-                        FROM privmsg m
-                        JOIN user u ON m.user_id = u.user_id
-                        JOIN room r ON m.room_id = r.room_id
-                        WHERE r.room_name = ? AND u.user_id = ?
-                        ORDER BY m.timestamp DESC
-                        ''', (room_name, user_id))
-    
-    if messages is None:
-        return jsonify({
-            'error': 'Not found',
-            'message': f'No messages found for user ID {user_id} in room {room_name}.'
-        }), 404
-    
-    return jsonify({
-        'messages': messages,
-        'count': len(messages)
-    }), 200
-
-@msg_blueprint.route('/<int:room_id>/all/user_name', methods=['GET'])
-def get_all_messages_room_id_user_name(room_id, user_name):
-    """
-    GET /api/messages/<room_id>/all/user_name
-    """
-
-    messages = query_db('''
-                        SELECT
-                            u.display_name,
-                            r.room_name,
-                            m.msg_content,
-                            m.reply_msg_body,
-                            m.timestamp
-                        FROM privmsg m
-                        JOIN user u ON m.user_id = u.user_id
-                        JOIN room r ON m.room_id = r.room_id
-                        WHERE r.room_id = ? AND u.display_name = ?
-                        ORDER BY m.timestamp DESC
-                        ''', (room_id, user_name))
-    
-    if messages is None:
-        return jsonify({
-            'error':'Not found',
-            'messages': f'No messages found for user {user_name} in room ID {room_id}.'
-        }), 404
-    
-    return jsonify({
-        'messages': messages,
-        'count': len(messages)
-    }), 200
-
-
-@msg_blueprint.route('/<int:room_id>/all/<int:user_id>', methods=['GET'])
-def get_all_messages_room_id_user_id(room_id, user_id):
-    """
-    GET /api/messages/<room_id>/all/<user_id>
-    """
-
-    messages = query_db('''
-                        SELECT
-                            u.display_name,
-                            r.room_name,
-                            m.msg_content,
-                            m.reply_msg_body,
-                            m.timestamp
-                        FROM privmsg m
-                        JOIN user u ON m.user_id = u.user_id
-                        JOIN room r ON m.room_id = r.room_id
-                        WHERE r.room_id = ? AND u.user_id = ?
-                        ORDER BY m.timestamp DESC
-                        ''', (room_id, user_id))
-    
-    if messages is None:
-        return jsonify({
-            'error': 'Not found',
-            'message': f'No messages found for user ID {user_id} in room ID {room_id}.'
-        }), 404
-    
-    return jsonify({
-        'messages': messages,
-        'count': len(messages)
-    }), 200
+    raise ValueError(f"Could not parse date: '{date_string}'")
