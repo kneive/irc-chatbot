@@ -35,7 +35,7 @@ from ..models import (Announcement,
                       UserRoom, 
                       ViewerMilestone)
 
-from parsers.tags import (AnnouncementTag, 
+from src.parsers.tags import (AnnouncementTag, 
                           BaseTag,
                           BitsBadgeTierTag,
                           PaidupgradeTag,

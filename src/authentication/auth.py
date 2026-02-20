@@ -5,7 +5,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 KEYS = PROJECT_ROOT / 'keyz'
 TOKEN = KEYS / 'token'
 REDIRECT_URI = 'http://localhost:3000'

@@ -3,7 +3,7 @@ import traceback
 from typing import List, Optional
 
 class DatabaseManager:
-    def __init__(self, db_path='saltmine.db'):
+    def __init__(self, db_path='database/saltmine.db'):
         self.db_path = db_path
         self.setup_database()
 

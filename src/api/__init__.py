@@ -4,7 +4,7 @@ from flask_cors import CORS
 from .models import database
 from pathlib import Path
 
-DB_PATH = Path(__file__).parent.parent / 'saltmine.db'
+DB_PATH = Path(__file__).parent.parent.parent/ 'database' / 'saltmine.db'
 
 def create_app(config=None):
     """
@@ -62,8 +62,7 @@ def create_app(config=None):
         """
         return jsonify({
             'error': 'Bad request',
-            'message': 'The request was invalid or malformed',
-            'status': 400
+            'message': 'The request is invalid or malformed',
         }), 400
 
 
@@ -85,7 +84,7 @@ def create_app(config=None):
 
         return jsonify({
             'error': 'Internal server error',
-            'message': 'Something went wrong server-side'
+            'message': 'Something went wrong'
         }), 500
 
 

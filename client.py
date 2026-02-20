@@ -5,34 +5,35 @@ import threading
 import traceback
 import socket
 import ssl
-from auth import get_token
+from src.authentication.auth import get_token
 from pathlib import Path
-from parsers.parser import Saltshaker
-from db.repositories import (AnnouncementRepository,
-                             BitsRepository,
-                             BitsbadgetierRepository, 
-                             OnetapgiftRepository,
-                             PaidupgradeRepository,
-                             PayforwardRepository,
-                             PrivmsgRepository,
-                             RaidRepository, 
-                             RoomRepository, 
-                             RoomStateRepository, 
-                             SubgiftRepository,
-                             SubmysteryRepository, 
-                             SubRepository, 
-                             UserRoomRepository, 
-                             UserlistRepository, 
-                             UserRepository,
-                             ViewerMilestoneRepository)
+from src.parsers.parser import Saltshaker
+from src.db.repositories import (AnnouncementRepository,
+                                 BitsRepository,
+                                 BitsbadgetierRepository, 
+                                 OnetapgiftRepository,
+                                 PaidupgradeRepository,
+                                 PayforwardRepository,
+                                 PrivmsgRepository,
+                                 RaidRepository, 
+                                 RoomRepository, 
+                                 RoomStateRepository, 
+                                 SubgiftRepository,
+                                 SubmysteryRepository, 
+                                 SubRepository, 
+                                 UserRoomRepository, 
+                                 UserlistRepository, 
+                                 UserRepository,
+                                 ViewerMilestoneRepository)
 
-from db.services.service import SaltyService
-from db.database import DatabaseManager
+from src.db.services.service import SaltyService
+from src.db.database import DatabaseManager
 
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).parent
 LOGINDATA = PROJECT_ROOT / 'keyz' / 'logins.key'
 CONFIG = PROJECT_ROOT / 'config' / 'config.json'
-LOGFILE = PROJECT_ROOT / 'logs' / 'logs'
+LOGFILE = PROJECT_ROOT / 'logs' / 'logs.log'
+DATABASE = PROJECT_ROOT / 'database' / 'saltmine.db'
 
 TOKEN = get_token()
 
@@ -61,7 +62,7 @@ class IRCClient:
         self.last_ping_time = time.time()
         self.ping_timeout = 300
 
-        db_manager = DatabaseManager('saltmine.db')
+        db_manager = DatabaseManager(DATABASE)
         announcement_repo = AnnouncementRepository(db_manager)
         bits_repo = BitsRepository(db_manager)
         bitsbadge_repo = BitsbadgetierRepository(db_manager)
