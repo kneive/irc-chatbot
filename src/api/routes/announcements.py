@@ -2,77 +2,74 @@ from flask import Blueprint, jsonify, request
 from ..models.database import query_db
 from ..utils import utils
 
-sub_blueprint = Blueprint('subscriptions', __name__, url_prefix='/api/subscriptions')
+announcement_blueprint = Blueprint('announcements', __name__, url_prefix='/api/announcements')
 
-@sub_blueprint.route('/', methods=['GET'])
-def get_subscriptions():
+@announcement_blueprint.route('/', methods=['GET'])
+def get_announcements():
     """
-    GET /api/subscriptions
+    GET /api/announcements
     """
-
     try:
-
-        room_name = request.args.get('room-name', default=None, type=str)
-        room_id = request.args.get('room-id', default=None, type=int)
         user_name = request.args.get('user-name', default=None, type=str)
         user_id = request.args.get('user-id', default=None, type=int)
+        room_name = request.args.get('room-name', default=None, type=str)
+        room_id = request.args.get('room-id', default=None, type=int)
         start_date = request.args.get('start-date', default=None, type=str)
         end_date = request.args.get('end-date', default=None, type=str)
 
         query = '''
                 SELECT
-                    u.display_name, 
                     r.room_name,
-                    s.sub_plan,
-                    s.timestamp
-                FROM sub s
-                JOIN user u ON s.user_id = u.user_id
-                JOIN room r ON s.room_id = r.room_id
+                    a.display_name,
+                    a.msg_content,
+                    a.timestamp
+                FROM announcement a
+                JOIN room r ON a.room_id = r.room_id
                 WHERE 1=1
                 '''
         
         params = []
 
+        if user_name is not None:
+            query += ' AND a.display_name = ?'
+            params.append(user_name)
+
+        if user_id is not None:
+            query += ' AND a.user_id = ?'
+            params.append(user_id)
+
         if room_name is not None:
             query += ' AND r.room_name = ?'
             params.append(room_name)
 
-        elif room_id is not None:
+        if room_id is not None:
             query += ' AND r.room_id = ?'
             params.append(room_id)
 
-        if user_name is not None:
-            query += ' AND u.display_name = ?'
-            params.append(user_name)
-        
-        if user_id is not None:
-            query += ' AND u.user_id = ?'
-            params.append(user_id)
-
         if start_date is not None:
             parsed_date = utils.parse_date(start_date)
-            query += ' AND s.timestamp >= ?'
+            query += ' AND a.timestamp >= ?'
             params.append(parsed_date)
 
         if end_date is not None:
             parsed_date = utils.parse_date(end_date, end_of_day=True)
-            query += ' AND s.timestamp <= ?'
+            query += ' AND a.timestamp <= ?'
             params.append(parsed_date)
 
-        subs = query_db(query, tuple(params))
+        announcements = query_db(query, params)
 
-        if subs is None:
+        if announcements is None:
             return jsonify({
                 'error': 'Not found',
-                'message': 'No subscriptions found matching the criteria.'
+                'message': 'No announcements found matching the criteria.'
             }), 404
         
         return jsonify({
-            'subscriptions': subs,
-            'count': len(subs)
+            'announcements': announcements,
+            'count': len(announcements)
         }), 200
-    
+
     except ValueError as e:
         return jsonify({
-            'error' : str(e)
+            'error': str(e)
         }), 400

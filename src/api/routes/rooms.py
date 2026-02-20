@@ -9,36 +9,43 @@ def get_room():
     GET /api/rooms
     """
 
-    room_name = request.args.get('room-name', default=None, type=str)
-    room_id = request.args.get('room-id', default=None, type=int)
+    try:
 
-    query = '''
-            SELECT
-                room_id,
-                room_name
-            FROM room
-            WHERE 1=1
-            '''
+        room_name = request.args.get('room-name', default=None, type=str)
+        room_id = request.args.get('room-id', default=None, type=int)
 
-    params = []
+        query = '''
+                SELECT
+                    room_id,
+                    room_name
+                FROM room
+                WHERE 1=1
+                '''
 
-    if room_name:
-        query += ' AND room_name = ?'
-        params.append(room_name)
+        params = []
 
-    elif room_id:
-        query += ' AND room_id = ?'
-        params.append(room_id)
+        if room_name:
+            query += ' AND room_name = ?'
+            params.append(room_name)
 
-    room = query_db(query, tuple(params))
+        elif room_id:
+            query += ' AND room_id = ?'
+            params.append(room_id)
 
-    if not room:
+        room = query_db(query, tuple(params))
+
+        if not room:
+            return jsonify({
+                'error': 'Not found',
+                'message': f'Room {params[0]} not found.'
+            }), 404
+        
         return jsonify({
-            'error': 'Not found',
-            'message': f'Room {params[0]} not found.'
-        }), 404
+            'room_id': room['room_id'],
+            'room_name': room['room_name']
+        }), 200
     
-    return jsonify({
-        'room_id': room['room_id'],
-        'room_name': room['room_name']
-    }), 200
+    except ValueError as e:
+        return jsonify({
+            'error': str(e)
+        }), 400

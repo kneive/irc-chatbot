@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from ..models.database import query_db
-from datetime import datetime
+from ..utils import utils
 
 msg_blueprint = Blueprint('messages', __name__, url_prefix='/api/messages')
 
@@ -38,7 +38,7 @@ def get_messages():
             query += ' AND u.display_name = ?'
             params.append(user_name)
 
-        elif user_id is not None:
+        if user_id is not None:
             query += ' AND u.user_id = ?'
             params.append(user_id)
 
@@ -46,23 +46,29 @@ def get_messages():
             query += ' AND r.room_name = ?'
             params.append(room_name)
 
-        elif room_id is not None:
+        if room_id is not None:
             query += ' AND r.room_id = ?'
             params.append(room_id)
 
         if start_date is not None:
-            parsed_date = _parse_date(start_date)
+            parsed_date = utils.parse_date(start_date)
             query += ' AND m.timestamp >= ?'
             params.append(parsed_date)        
 
         if end_date is not None:
-            parsed_date = _parse_date(end_date, end_of_day=True)
+            parsed_date = utils.parse_date(end_date, end_of_day=True)
             query += ' AND m.timestamp <= ?'
             params.append(parsed_date)
 
         query += ' ORDER BY m.timestamp DESC'
 
         messages = query_db(query, tuple(params))
+
+        if messages is None:
+            return jsonify({
+                'error': 'Not found',
+                'message': 'No messages found matching the criteria.'
+            }), 404
 
         return jsonify({
             'messages': messages,
@@ -73,40 +79,3 @@ def get_messages():
         return jsonify({
             'error': str(e)
         }), 400
-        
-
-def _parse_date(date_string, end_of_day=False):
-    """
-    utility for parsing date strings into YYYY-MM-DD format.
-    
-    :param date_str: date string to parse into YYYY-MM-DD format
-    :param end_of_day: flag for setting time to 00:00:00 (False) or 23:59:59 (True)
-    """
-
-    if not date_string:
-        return None
-    
-    formats = [
-        '%d.%m.%Y',
-        '%d/%m/%Y',
-        '%d-%m-%Y',
-        '%m.%d.%Y',
-        '%m/%d/%Y',
-        '%m-%d-%Y',
-        '%Y.%m.%d',
-        '%Y/%m/%d',
-        '%Y-%m-%d',
-    ]
-
-    for fmt in formats:
-        try:
-            parsed = datetime.strptime(date_string, fmt)
-            if end_of_day:
-                parsed = parsed.replace(hour=23, minute=59, second=59)
-            else:
-                parsed = parsed.replace(hour=0, minute=0, second=0)
-            return parsed.isoformat()
-        except ValueError:
-            continue
-
-    raise ValueError(f"Could not parse date: '{date_string}'")
