@@ -55,14 +55,12 @@ def get_subscriptions():
             params.append(user_id)
 
         if start_date is not None:
-            parsed_date = utils.parse_date(start_date)
             query += ' AND s.timestamp >= ?'
-            params.append(parsed_date)
+            params.append(utils.parse_date(start_date))
 
         if end_date is not None:
-            parsed_date = utils.parse_date(end_date, end_of_day=True)
             query += ' AND s.timestamp <= ?'
-            params.append(parsed_date)
+            params.append(utils.parse_date(end_date, end_of_day=True))
 
         subs = query_db(query, tuple(params))
 

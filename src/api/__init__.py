@@ -29,13 +29,19 @@ def create_app(config=None):
     database.init_app(app)
 
     # register blueprints
-    from .routes import announcements, gifts, messages, rooms, subs, users
+    from .routes import (announcements, bits, gifts, messages, onetapgift, 
+                         paidupgrade, payforward, rooms, subs, users)
+    
     app.register_blueprint(announcements.announcement_blueprint)
+    app.register_blueprint(bits.bits_blueprint)
     app.register_blueprint(gifts.gift_blueprint)
     app.register_blueprint(messages.msg_blueprint)
     app.register_blueprint(rooms.room_blueprint)
     app.register_blueprint(subs.sub_blueprint)
     app.register_blueprint(users.user_blueprint)
+    app.register_blueprint(onetapgift.tap_blueprint)
+    app.register_blueprint(paidupgrade.upgrade_blueprint)
+    app.register_blueprint(payforward.payforward_blueprint)
 
     # root endpoint
 

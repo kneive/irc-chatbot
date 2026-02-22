@@ -2,14 +2,15 @@ from flask import Blueprint, jsonify, request
 from ..models.database import query_db
 from ..utils import utils
 
-announcement_blueprint = Blueprint('announcements', __name__, url_prefix='/api/announcements')
+payforward_blueprint = Blueprint('payforwards', __name__, url_prefix='/api/payforwards')
 
-@announcement_blueprint.route('/', methods=['GET'])
-def get_announcements():
+@payforward_blueprint.route('/', methods=['GET'])
+def get_payforward():
     """
-    GET /api/announcements
+    GET /api/payforwards
     """
     try:
+
         user_name = request.args.get('user-name', default=None, type=str)
         user_id = request.args.get('user-id', default=None, type=int)
         room_name = request.args.get('room-name', default=None, type=str)
@@ -17,29 +18,37 @@ def get_announcements():
         start_date = request.args.get('start-date', default=None, type=str)
         end_date = request.args.get('end-date', default=None, type=str)
 
+        limit = request.args.get('limit', default=500, type=int)
+        offset = request.args.get('offset', default=0, type=int)
+
+        limit = min(limit, 1000)
+
         query = '''
                 SELECT
+                    p.timestamp,
+                    p.prior_gifter_display_name,
+                    p.recipient_display_name,
+                    p.system_msg,
                     r.room_name,
-                    a.display_name,
-                    a.msg_content,
-                    a.timestamp
-                FROM announcement a
-                JOIN room r ON a.room_id = r.room_id
+                    u.display_name
+                FROM payforward p
+                LEFT JOIN user u ON p.user_id = u.user_id
+                LEFT JOIN room r ON p.room_id = r.room_id
                 WHERE 1=1
                 '''
         
         params = []
 
         if user_name is not None:
-            query += ' AND a.display_name = ?'
+            query += ' AND LOWER(u.display_name) = LOWER(?)'
             params.append(user_name)
 
         if user_id is not None:
-            query += ' AND a.user_id = ?'
+            query += ' AND u.user_id = ?'
             params.append(user_id)
 
         if room_name is not None:
-            query += ' AND r.room_name = ?'
+            query += ' AND LOWER(r.room_name) = LOWER(?)'
             params.append(room_name)
 
         if room_id is not None:
@@ -47,24 +56,28 @@ def get_announcements():
             params.append(room_id)
 
         if start_date is not None:
-            query += ' AND a.timestamp >= ?'
+            query += ' AND p.timestamp >= ?'
             params.append(utils.parse_date(start_date))
 
         if end_date is not None:
-            query += ' AND a.timestamp <= ?'
+            query += ' AND p.timestamp <= ?'
             params.append(utils.parse_date(end_date, end_of_day=True))
 
-        announcements = query_db(query, params)
+        query += ' ORDER BY p.timestamp DESC'
+        query += ' LIMIT ? OFFSET ?'
 
-        if announcements is None:
+        params.extend([limit, offset])
+
+        payforwards = query_db(query, tuple(params))
+
+        if payforwards is None:
             return jsonify({
-                'error': 'Not found',
-                'message': 'No announcements found matching the criteria.'
+                'error': 'No payforward events found matching the criteria.'
             }), 404
         
         return jsonify({
-            'announcements': announcements,
-            'count': len(announcements)
+            'data': payforwards,
+            'count': len(payforwards)
         }), 200
 
     except ValueError as e:

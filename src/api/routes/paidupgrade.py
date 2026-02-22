@@ -1,40 +1,44 @@
 from flask import Blueprint, jsonify, request
-from ..models import database
+from ..models.database import query_db
 from ..utils import utils
 
-gift_blueprint = Blueprint('mysterygifts', __name__, url_prefix='/api/mysterygifts')
+upgrade_blueprint = Blueprint('paidupgrades', __name__, url_prefix='/api/paidupgrades')
 
-@gift_blueprint.route('/', methods=['GET'])
-def get_gifts():
+@upgrade_blueprint.route('/', methods=['GET'])
+def get_paidupgrade():
     """
-    GET /api/mysterygifts
+    GET /api/paidupgrades
     """
-
     try:
-        user_name = request.args.get('user-name', default=None, type=str)
+        user_name = request.args.get('user-name', default=None)
         user_id = request.args.get('user-id', default=None, type=int)
         room_name = request.args.get('room-name', default=None, type=str)
         room_id = request.args.get('room-id', default=None, type=int)
         start_date = request.args.get('start-date', default=None, type=str)
         end_date = request.args.get('end-date', default=None, type=str)
 
+        limit = request.args.get('limit', default=500, type=int)
+        offset = request.args.get('offset', default=0, type=int)
+
+        limit = min(limit, 1000)
+
         query = '''
                 SELECT
+                    p.timestamp,
+                    p.sub_plan,
+                    p.sender_name,
                     u.display_name,
-                    r.room_name,
-                    g.sub_plan,
-                    g.mass_gift_count,
-                    g.timestamp
-                FROM submysterygift g
-                JOIN user u ON g.user_id = u.user_id
-                JOIN room r ON g.room_id = r.room_id
+                    r.room_name
+                FROM paidupgrade p
+                LEFT JOIN user u ON p.user_id = u.user_id
+                LEFT JOIN room r ON p.room_id = r.room_id
                 WHERE 1=1
                 '''
         
         params = []
 
-        if user_name is not None:
-            query += ' AND u.display_name = ?'
+        if user_name  is not None:
+            query += ' AND LOWER (u.display_name) = LOWER(?)'
             params.append(user_name)
         
         if user_id is not None:
@@ -42,7 +46,7 @@ def get_gifts():
             params.append(user_id)
 
         if room_name is not None:
-            query += ' AND r.room_name = ?'
+            query += ' AND LOWER(r.room_name) = LOWER(?)'
             params.append(room_name)
 
         if room_id is not None:
@@ -50,24 +54,28 @@ def get_gifts():
             params.append(room_id)
 
         if start_date is not None:
-            query += ' AND g.timestamp >= ?'
+            query += ' AND p.timestamp >= ?'
             params.append(utils.parse_date(start_date))
 
         if end_date is not None:
-            query += ' AND g.timestamp <= ?'
+            query += ' AND p.timestamp <= ?'
             params.append(utils.parse_date(end_date, end_of_day=True))
 
-        gifts = database.query_db(query, tuple(params))
+        query += ' ORDER BY p.timestamp DESC'
+        query += ' LIMIT ? OFFSET ?'
 
-        if gifts is None:
+        params.extend([limit, offset])
+
+        paidupgrades = query_db(query, tuple(params))
+
+        if paidupgrades is None:
             return jsonify({
-                'error': 'Not found',
-                'message': 'No mystery gifts found matching the criteria.'
+                'error': ' No paid upgrades found matching the criteria.'
             }), 404
         
         return jsonify({
-            'mystery_gifts': gifts,
-            'count': len(gifts)
+            'data': paidupgrades,
+            'count': len(paidupgrades)
         }), 200
 
     except ValueError as e:
