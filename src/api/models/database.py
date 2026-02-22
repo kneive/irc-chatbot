@@ -51,6 +51,9 @@ def query_db(query:str, args:tuple=(), one:bool=False) -> Optional[Dict[str, Any
 
     results = [dict(row) for row in data]
 
+    if not results:
+        return None
+
     return results[0] if one else results
 
 def execute_db(query:str, args:tuple=())->int:

@@ -19,6 +19,11 @@ def get_subscriptions():
         start_date = request.args.get('start-date', default=None, type=str)
         end_date = request.args.get('end-date', default=None, type=str)
 
+        limit = request.args.get('limit', default=500, type=int)
+        offset = request.args.get('offset', default=0, type=int)
+
+        limit = min(limit, 1000)    # upper limit per request
+
         query = '''
                 SELECT
                     u.display_name, 

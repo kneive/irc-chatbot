@@ -1,4 +1,4 @@
-from .routes.old_routes import messages, rooms
+from .routes import messages, rooms
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from .models import database
@@ -29,23 +29,24 @@ def create_app(config=None):
     database.init_app(app)
 
     # register blueprints
-    from .routes import announcements, gifts, messages, rooms, subs
+    from .routes import announcements, gifts, messages, rooms, subs, users
     app.register_blueprint(announcements.announcement_blueprint)
     app.register_blueprint(gifts.gift_blueprint)
     app.register_blueprint(messages.msg_blueprint)
     app.register_blueprint(rooms.room_blueprint)
     app.register_blueprint(subs.sub_blueprint)
+    app.register_blueprint(users.user_blueprint)
 
     # root endpoint
 
-    @app.route('/')
+    @app.route('/api/')
     def home():
-        return {
+        return jsonify({
             'message':'Saltmine API',
             'version': '1.0.0',
             'endpoints': {
             }
-        }
+        }),200
 
     @app.route('/api/health')
     def health():

@@ -17,7 +17,10 @@ def get_messages():
     start_date = request.args.get('start-date', default=None, type=str)
     end_date = request.args.get('end-date', default=None, type=str)
     #all = request.args.get('all', default=False, type=bool)
-    
+    limit = request.args.get('limit', default=500, type=int)
+    offset = request.args.get('offset', default=0, type=int)
+
+    limit = min(limit, 1000)    # upper limit per request
     try:
         query = '''
                 SELECT
@@ -35,7 +38,7 @@ def get_messages():
         params = []
 
         if user_name is not None:
-            query += ' AND u.display_name = ?'
+            query += ' AND LOWER(u.display_name) = LOWER(?)'
             params.append(user_name)
 
         if user_id is not None:
@@ -61,6 +64,10 @@ def get_messages():
             params.append(parsed_date)
 
         query += ' ORDER BY m.timestamp DESC'
+        
+        query += ' LIMIT ? OFFSET ?'
+        params.append(limit)
+        params.append(offset)
 
         messages = query_db(query, tuple(params))
 
@@ -72,7 +79,10 @@ def get_messages():
 
         return jsonify({
             'messages': messages,
-            'count': len(messages)
+            'count': len(messages),
+            'limit': limit,
+            'offset': offset,
+            'hasMore': len(messages) == limit
         }), 200
 
     except ValueError as e:
