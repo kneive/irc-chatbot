@@ -111,7 +111,7 @@ class TagFactory:
     def createGiftPaidupgradeTag(raw_tags:dict):
         """Creatte tags for GIFTPAIDUPGRADE messages"""
 
-        return PaidupgradeTags(room_name=raw_tags.get('room-name'),
+        return PaidupgradeTag(room_name=raw_tags.get('room-name'),
                                room_id=raw_tags.get('room-id'),
                                source_room_name=raw_tags.get('source-room-name', '#unknown'),
                                source_room_id=raw_tags.get('source-room-id', None),

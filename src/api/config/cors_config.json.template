@@ -1,0 +1,14 @@
+{
+    "development": {
+        "origins": ["url(s) for development"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_credentials": true,
+        "max_age": 3600
+    },
+    "production": {
+        "origins":["production url"],
+        "methods": ["GET"],
+        "allow_credentials": true,
+        "max_age": 36000
+    }
+}

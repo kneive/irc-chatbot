@@ -2,6 +2,7 @@ from .routes import messages, rooms
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from .models import database
+from .utils import loader
 from pathlib import Path
 
 DB_PATH = Path(__file__).parent.parent.parent/ 'database' / 'saltmine.db'
@@ -23,7 +24,13 @@ def create_app(config=None):
     if config:
         app.config.update(config)
 
-    CORS(app)
+    cors_config = loader.load_config()
+
+    CORS(app,
+         origins=cors_config['origins'],
+         methods=cors_config['methods'],
+         supports_credentials=cors_config['allow_credentials'],
+         max_age=cors_config['max_age'])
 
     # init database
     database.init_app(app)

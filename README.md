@@ -40,6 +40,8 @@ project/
 │   │
 │   ├──api                  # Flask REST Api
 │   │   │
+│   │   ├──config           # CORS configuration
+│   │   │
 │   │   ├──models           # Database utilities for Flask
 │   │   │
 │   │   ├──routes           # API endpoint definitions
@@ -162,6 +164,27 @@ app.run(
     port=5000
 )
 ```
+
+CORS API settings in `/src/api/config/cors_config.json.template`
+
+```JSON
+{
+    "development": {
+        "origins": ["url(s) for development"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_credentials": true,
+        "max_age": 3600
+    },
+    "production": {
+        "origins":["production url"],
+        "methods": ["GET"],
+        "allow_credentials": true,
+        "max_age": 36000
+    }
+}
+```
+
+rename the file to `cors_config.json`
 
 ## Usage
 
@@ -350,7 +373,8 @@ curl "http://localhost:5000/api/subscriptions?room-name=channel&start-date=2024-
 Example response:
 ```JSON
 {
-  "subscriptions": [
+  "subscriptions": 
+  [
     {
       "display_name": "username",
       "room_name": "channel",
@@ -359,6 +383,74 @@ Example response:
     }
   ],
   "count":
+}
+```
+#### 9 community and standard payforward: /api/payforwards
+
+Example request:
+```Shell
+curl "http://localhost:5000/api/payforwards?room-name=channel&start-date=2024-01-01"
+```
+
+Example response:
+```JSON
+{
+  "payforwards": 
+  [
+    {
+      "display_name": "current gifter",
+      "prior_gifter_display_name": "prior gifter",
+      "recipient_display_name": "recipient",
+      "room_name": "channel",
+      "timestamp": "date",
+      "system_msg": "message"
+    }
+  ]
+}
+```
+
+#### 10 paid upgrade: /api/paidupgrades
+
+Example request:
+```Shell
+curl "http://localhost:5000/api/paidupgrades?room-name=channel&start-date=2024-01-01"
+```
+
+Example response:
+```JSON
+{
+  "paidupgrades": 
+  [
+    {
+      "sender_name" : "sender",
+      "display_name" : "recipient",
+      "room_name" : "channel",
+      "timestamp" : "date",
+      "sub_plan" : "sub-plan"
+    }
+  ]
+}
+```
+
+#### 11 one tap gift: /api/onetapgifts
+
+Example request:
+```Shell
+curl "http://localhost:5000/api/onetapgifts?room-name=channel&start-date=2024-01-01"
+```
+
+Example response:
+```JSON
+{
+  "onetapgifts":
+  [
+    {
+      "display_name": "gift user",
+      "room_name": "channel",
+      "timestamp": "date",
+      "system_msg": "system message"
+    }
+  ]
 }
 ```
 
