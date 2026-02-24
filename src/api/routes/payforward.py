@@ -72,12 +72,19 @@ def get_payforward():
 
         if payforwards is None:
             return jsonify({
-                'error': 'No payforward events found matching the criteria.'
-            }), 404
+                'data': [],
+                'count': 0,
+                'limit': limit,
+                'offset': offset,
+                'hasMore': False
+            }), 200
         
         return jsonify({
             'data': payforwards,
-            'count': len(payforwards)
+            'count': len(payforwards),
+            'limit': limit,
+            'offset': offset,
+            'hasMore': len(payforwards) == limit
         }), 200
 
     except ValueError as e:

@@ -17,6 +17,11 @@ def get_announcements():
         start_date = request.args.get('start-date', default=None, type=str)
         end_date = request.args.get('end-date', default=None, type=str)
 
+        limit = request.args.get('limit', default=500, type=int)
+        offset = request.args.get('offset', default=0, type=int)
+
+        limit = min(limit, 1000)
+
         query = '''
                 SELECT
                     r.room_name,
@@ -54,17 +59,28 @@ def get_announcements():
             query += ' AND a.timestamp <= ?'
             params.append(utils.parse_date(end_date, end_of_day=True))
 
+        query += ' ORDER BY a.timestamp DESC'
+        query += ' LIMIT ? OFFSET ?'
+
+        params.extend([limit, offset])    
+
         announcements = query_db(query, params)
 
         if announcements is None:
             return jsonify({
-                'error': 'Not found',
-                'message': 'No announcements found matching the criteria.'
-            }), 404
+                'data': [],
+                'count': 0,
+                'limit': limit,
+                'offset': offset,
+                'hasMore': False
+            }), 200
         
         return jsonify({
-            'announcements': announcements,
-            'count': len(announcements)
+            'data': announcements,
+            'count': len(announcements),
+            'limit': limit,
+            'offset': offset,
+            'hasMore': len(announcements) == limit
         }), 200
 
     except ValueError as e:

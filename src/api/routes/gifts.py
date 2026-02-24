@@ -18,6 +18,11 @@ def get_gifts():
         start_date = request.args.get('start-date', default=None, type=str)
         end_date = request.args.get('end-date', default=None, type=str)
 
+        limit = request.args.get('limit', default=500, type=int)
+        offset = request.args.get('offset', default=0, type=int)
+
+        limit = min(limit, 1000)
+
         query = '''
                 SELECT
                     u.display_name,
@@ -57,17 +62,28 @@ def get_gifts():
             query += ' AND g.timestamp <= ?'
             params.append(utils.parse_date(end_date, end_of_day=True))
 
+        query += ' ORDER BY g.timestamp DESC'
+        query += ' LIMIT ? OFFSET ?'
+
+        params.extend([limit, offset])
+
         gifts = database.query_db(query, tuple(params))
 
         if gifts is None:
             return jsonify({
-                'error': 'Not found',
-                'message': 'No mystery gifts found matching the criteria.'
-            }), 404
+                'data': [],
+                'count': 0,
+                'limit': limit,
+                'offset': offset,
+                'hasMore': False
+            }), 200
         
         return jsonify({
-            'mystery_gifts': gifts,
-            'count': len(gifts)
+            'data': gifts,
+            'count': len(gifts),
+            'limit': limit,
+            'offset': offset,
+            'hasMore': len(gifts) == limit
         }), 200
 
     except ValueError as e:

@@ -62,7 +62,6 @@ def get_messages():
             params.append(utils.parse_date(end_date, end_of_day=True))
 
         query += ' ORDER BY m.timestamp DESC'
-        
         query += ' LIMIT ? OFFSET ?'
 
         params.extend([limit, offset])
@@ -71,12 +70,15 @@ def get_messages():
 
         if messages is None:
             return jsonify({
-                'error': 'Not found',
-                'message': 'No messages found matching the criteria.'
-            }), 404
+                'data': [],
+                'count': 0,
+                'limit': limit,
+                'offset': offset,
+                'hasMore': False
+            }), 200
 
         return jsonify({
-            'messages': messages,
+            'data': messages,
             'count': len(messages),
             'limit': limit,
             'offset': offset,

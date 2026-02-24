@@ -70,12 +70,19 @@ def get_paidupgrade():
 
         if paidupgrades is None:
             return jsonify({
-                'error': ' No paid upgrades found matching the criteria.'
-            }), 404
+                'data': [],
+                'count': 0,
+                'limit': limit,
+                'offset': offset,
+                'hasMore': False
+            }), 200
         
         return jsonify({
             'data': paidupgrades,
-            'count': len(paidupgrades)
+            'count': len(paidupgrades),
+            'limit': limit,
+            'offset': offset,
+            'hasMore': len(paidupgrades) == limit
         }), 200
 
     except ValueError as e:

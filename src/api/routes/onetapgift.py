@@ -62,21 +62,27 @@ def get_onetapgift():
             params.append(utils.parse_date(end_date, end_of_day=True))
 
         query += ' ORDER BY O.timestamp DESC'
-
         query += ' LIMIT ? OFFSET ?'
 
         params.extend([limit, offset])
         
-        tapgifts = query_db(query, tuple(params))
+        onetapgifts = query_db(query, tuple(params))
 
-        if tapgifts is None:
+        if onetapgifts is None:
             return jsonify({
-                'error': 'No onetapgift events found matching the criteria.'
-            }), 404
+                'data': [],
+                'count': 0,
+                'limit': limit,
+                'offset': offset,
+                'hasMore': False
+            }), 200
         
         return jsonify({
-            'data': tapgifts,
-            'count': len(tapgifts)
+            'data': onetapgifts,
+            'count': len(onetapgifts),
+            'limit': limit,
+            'offset': offset,
+            'hasMore': len(onetapgifts) == limit
         }), 200
 
     except ValueError as e:

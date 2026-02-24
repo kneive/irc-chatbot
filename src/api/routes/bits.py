@@ -69,12 +69,19 @@ def get_bits():
 
         if bits is None:
             return jsonify({
-                'error': 'No entries were found matching the provided criteria.'
-            }), 404
+                'data': [],
+                'count': 0,
+                'limit': limit,
+                'offset': offset,
+                'hasMore': False
+            }), 200
         
         return jsonify({
             'data': bits,
-            'count': len(bits)
+            'count': len(bits),
+            'limit': limit,
+            'offset': offset,
+            'hasMore': len(bits) == limit
         }), 200
 
     except ValueError as e:

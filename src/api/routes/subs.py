@@ -62,17 +62,28 @@ def get_subscriptions():
             query += ' AND s.timestamp <= ?'
             params.append(utils.parse_date(end_date, end_of_day=True))
 
+        query += ' ORDER BY s.timestamp DESC'
+        query += ' LIMIT ? OFFSET ?'
+
+        params.extend([limit, offset])
+
         subs = query_db(query, tuple(params))
 
         if subs is None:
             return jsonify({
-                'error': 'Not found',
-                'message': 'No subscriptions found matching the criteria.'
-            }), 404
+                'data': [],
+                'count': 0,
+                'limit': limit,
+                'offset': offset,
+                'hasMore': False
+            }), 200
         
         return jsonify({
-            'subscriptions': subs,
-            'count': len(subs)
+            'data': subs,
+            'count': len(subs),
+            'limit': limit,
+            'offset': offset,
+            'hasMore': len(subs) == limit
         }), 200
     
     except ValueError as e:
